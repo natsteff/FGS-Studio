@@ -2,8 +2,11 @@
 
 FGS Studio is a browser-only proof of concept for creating, importing, editing,
 and exporting FGS 1.0 GameSheets. It is an independent application, not a copy
-of Forge GameSheets. The source repository is intended to be private; its
-GitHub Pages site, if published, is public.
+of Forge GameSheets. Its source and GitHub Pages site are public.
+
+FGS Studio is licensed under the [GNU Affero General Public License v3.0](LICENSE).
+The vendored pdf-lib library retains its own MIT license in
+[`vendor/pdf-lib.LICENSE.md`](vendor/pdf-lib.LICENSE.md).
 
 No account or application server is needed. Sheets are held only in the open
 tab. Download the `.fgs` file to keep an editable copy; download PDF for
@@ -52,11 +55,8 @@ npm test
 The included workflow tests and packages only the public site files, then
 publishes them after a push to `main`, once
 Pages is enabled with **GitHub Actions** as its source in repository settings.
-Publishing is not configured or performed by this local prototype. A private
-source repository requires a GitHub plan that supports Pages for private repos;
-the resulting site is generally public even when the source repository is
-private. Verify repository settings and code/license rights before enabling the
-workflow. Do not commit real game documents, credentials, or private materials.
+The site is published at <https://natsteff.github.io/FGS-Studio/>. Do not
+commit real game documents, credentials, or private materials.
 
 ## Compatibility policy
 

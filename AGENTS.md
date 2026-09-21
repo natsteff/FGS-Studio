@@ -12,5 +12,5 @@ authority, not a source-code synchronization mechanism.
   structures; preserve supported namespaced extensions.
 - Add tests for format behavior and test actual browser export paths before
   claiming publication readiness.
-- Keep the source repository private unless the owner decides otherwise.
+- The owner approved publishing this source repository under AGPL-3.0.
 - Do not publish GitHub Pages or change remote settings without approval.
