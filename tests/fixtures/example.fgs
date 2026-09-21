@@ -1,0 +1,12 @@
+{
+  "format": "forge-gamesheets",
+  "format_version": "1.0",
+  "id": "example-sheet",
+  "title": "Example GameSheet",
+  "page": {"size": "letter", "orientation": "portrait"},
+  "theme": {"accent": "#c84b24"},
+  "rows": [
+    {"id": "row-heading", "blocks": [{"id": "block-heading", "type": "header", "title": "Example GameSheet", "subtitle": "A portable scoring example"}]},
+    {"id": "row-scoring", "blocks": [{"id": "block-scoring", "type": "score_table", "title": "Score table", "players": ["Player 1", "Player 2"], "score_rows": ["Round 1", "Round 2", "Total"], "show_total": false, "total_label": "Total"}]}
+  ]
+}
