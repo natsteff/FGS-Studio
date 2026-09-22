@@ -32,14 +32,14 @@ not transmitted to the host or any API.
 The SVG preview and selectable-text PDF now use one point-based display list
 from a pinned [FGS Renderer](vendor/fgs-renderer/manifest.json) build, also
 used by Forge GameSheets. Forge's local release candidate Page Rendering
-Profile ([in Forge](https://github.com/natsteff/forge-gamesheets/blob/9d0f137ed91b9a662f1a83cf85ef57f5e6d4f24f/docs/FGS_PAGE_RENDERING_PROFILE_1_0.md))
+Profile ([in Forge](https://github.com/natsteff/forge-gamesheets/blob/18961cfe2485cb1b00d1d965e8a6a396f943a337/docs/FGS_PAGE_RENDERING_PROFILE_1_0.md))
 specifies page geometry, fonts, accent
 titles, category weight, and overflow behavior. The
 renderer bundles Noto fonts under the SIL Open Font License; no CDN or document
 upload is used.
 
 The renderer source for this pinned build is Forge commit
-[`9d0f137`](https://github.com/natsteff/forge-gamesheets/tree/9d0f137ed91b9a662f1a83cf85ef57f5e6d4f24f/packages/fgs-renderer).
+[`18961cf`](https://github.com/natsteff/forge-gamesheets/tree/18961cfe2485cb1b00d1d965e8a6a396f943a337/packages/fgs-renderer).
 
 **Known prototype limits:** The first Page Rendering Profile does not yet cover every
 Unicode script. FGSZ, images,
