@@ -1,0 +1,130 @@
+{
+  "format": "forge-gamesheets",
+  "format_version": "1.0",
+  "id": "dense-sheet",
+  "title": "Dense score sheet",
+  "page": {
+    "size": "letter",
+    "orientation": "portrait"
+  },
+  "theme": {
+    "accent": "#c84b24"
+  },
+  "rows": [
+    {
+      "id": "row-header",
+      "blocks": [
+        {
+          "id": "block-header",
+          "type": "header",
+          "title": "Triple Yahtzee",
+          "subtitle": ""
+        }
+      ]
+    },
+    {
+      "id": "row-upper",
+      "blocks": [
+        {
+          "id": "block-upper",
+          "type": "score_table",
+          "title": "Upper Section",
+          "players": [
+            "Game 1 (x1)",
+            "Game 1 (x2)",
+            "Game 1 (x3)",
+            "Game 2 (x1)",
+            "Game 2 (x2)",
+            "Game 2 (x3)"
+          ],
+          "score_rows": [
+            "Ones, Count/Add Ones",
+            "Twos, Count/Add Twos",
+            "Threes, Count/Add Threes",
+            "Fours, Count/Add Fours",
+            "Fives, Count/Add Fives",
+            "Sixes, Count/Add Sixes",
+            "Total",
+            "Bonus 63+, 35",
+            "Grand Total"
+          ],
+          "show_total": false,
+          "total_label": "Total"
+        }
+      ]
+    },
+    {
+      "id": "row-lower",
+      "blocks": [
+        {
+          "id": "block-lower",
+          "type": "score_table",
+          "title": "Lower Section",
+          "players": [
+            "Game 1 (x1)",
+            "Game 1 (x2)",
+            "Game 1 (x3)",
+            "Game 2 (x1)",
+            "Game 2 (x2)",
+            "Game 2 (x3)"
+          ],
+          "score_rows": [
+            "3 of a Kind, Add all dice",
+            "4 of a Kind, Add all dice",
+            "Full House, 25",
+            "Low Straight (4 in a row), 30",
+            "High Straight (5 in a row), 40",
+            "Yahtzee (5 of a kind), 50",
+            "Chance, Add all dice",
+            "Additional Yahtzees, 100",
+            "Total"
+          ],
+          "show_total": false,
+          "total_label": "Total"
+        }
+      ]
+    },
+    {
+      "id": "row-finals",
+      "blocks": [
+        {
+          "id": "block-totals",
+          "type": "score_table",
+          "title": "Section Totals",
+          "players": [
+            "Game 1 (x1)",
+            "Game 1 (x2)",
+            "Game 1 (x3)",
+            "Game 2 (x1)",
+            "Game 2 (x2)",
+            "Game 2 (x3)"
+          ],
+          "score_rows": [
+            "Total Upper Section",
+            "Total Lower Section",
+            "Grand Total"
+          ],
+          "show_total": false,
+          "total_label": "Total"
+        },
+        {
+          "id": "block-grand",
+          "type": "score_table",
+          "title": "Grand Total",
+          "players": [
+            "Game 1",
+            "Game 2"
+          ],
+          "score_rows": [
+            "Column 1 Total x 1",
+            "Column 2 Total x 2",
+            "Column 3 Total x 3",
+            "Grand Total"
+          ],
+          "show_total": false,
+          "total_label": "Total"
+        }
+      ]
+    }
+  ]
+}

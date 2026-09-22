@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FGS Studio</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="vendor/pdf-lib.min.js" defer></script>
-  <script type="module" src="src/editor.js"></script>
+  <link rel="stylesheet" href="styles.css?v=8">
+  <script type="module" src="src/editor.js?v=8"></script>
 </head>
 <body>
   <header class="topbar">
     <div><p class="eyebrow">Portable GameSheets</p><h1>FGS Studio</h1></div>
+    <label class="document-title">Sheet title<input id="title" maxlength="160"></label>
     <nav aria-label="Document actions">
       <button id="new" type="button" class="secondary">New</button>
       <label class="button secondary">Import FGS<input id="import" type="file" accept=".fgs,application/json" hidden></label>
@@ -21,21 +21,27 @@
   <div class="notice">Your sheet stays in this browser tab. Download an FGS file to keep an editable copy; nothing is uploaded or saved on a server.</div>
   <p id="status" class="status" role="status" aria-live="polite"></p>
   <main class="workspace">
-    <section class="panel controls" aria-label="Editor">
-      <h2>Sheet settings</h2>
-      <div class="fields">
-        <label>Title<input id="title" maxlength="160"></label>
-        <label>Page size<select id="page-size"><option value="letter">Letter</option><option value="a4">A4</option></select></label>
-        <label>Orientation<select id="orientation"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></label>
-        <label>Accent color<input id="accent" type="color"></label>
-      </div>
-      <div class="section-heading"><h2>Sections</h2><div><label class="visually-hidden" for="block-type">Section type</label><select id="block-type"><option value="score_table">Score table</option><option value="header">Header</option><option value="reference">Reference</option><option value="checklist">Checklist</option><option value="notes">Notes</option></select><button id="add" type="button" class="secondary">Add</button></div></div>
+    <section class="controls" aria-label="Editor">
+      <h2>Sheet structure</h2>
+      <p class="hint">Select a section to edit. Use the arrows to reorder rows.</p>
       <div id="sections" class="sections"></div>
-      <p class="hint">Use the arrows to reorder sections. A row may contain one full-width section or two side by side.</p>
+      <div class="section-heading"><label for="block-type">Section type</label><div><select id="block-type"><option value="score_table">Score table</option><option value="header">Header</option><option value="reference">Reference</option><option value="checklist">Checklist</option><option value="notes">Notes</option></select><button id="add" type="button">+ Add section</button></div></div>
+      <hr>
+      <h2 id="properties-title">Section</h2>
+      <div id="properties" class="properties"></div>
+      <hr>
+      <p class="hint">A row may contain one full-width section or two side by side.</p>
     </section>
     <section class="preview-area" aria-label="Page preview">
-      <div class="preview-heading"><h2>Preview</h2><span id="fit" aria-live="polite"></span></div>
-      <canvas id="preview" aria-label="Printable sheet preview"></canvas>
+      <div class="preview-heading">
+        <label>Page<select id="page-size"><option value="letter">Letter</option><option value="a4">A4</option></select></label>
+        <label>Orientation<select id="orientation"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></label>
+        <label class="accent-control">Accent color<input id="accent" type="color"></label>
+        <button id="undo" type="button" class="secondary" disabled>↶ Undo</button>
+        <button id="redo" type="button" class="secondary" disabled>↷ Redo</button>
+        <span id="fit" aria-live="polite"></span>
+      </div>
+      <div id="preview" class="sheet-preview" aria-label="Printable sheet preview"></div>
     </section>
   </main>
   <footer>FGS Studio proof of concept · FGS 1.0 · Browser-only editing</footer>

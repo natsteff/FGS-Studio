@@ -1,10 +1,13 @@
 # FGS Studio project guidance
 
 FGS Studio is independent of Forge GameSheets. Keep its source and releases in
-this repository. Forge's published FGS specification is the interchange
-authority, not a source-code synchronization mechanism.
+this repository. Forge's published FGS document specification and Page Rendering Profile
+are the interchange and appearance authorities.
 
-- Do not copy Forge application code or private handoff materials here.
+- Do not copy private handoff materials here. The active preview and PDF must
+  consume the pinned FGS Renderer build; do not reintroduce a Studio-only
+  layout or PDF implementation. Update the renderer source and resync both
+  products when changing print behavior.
 - Keep document creation, validation, rendering, and downloads browser-side.
 - Never add a server API, cloud storage, analytics, or document uploads without
   an explicit product decision.

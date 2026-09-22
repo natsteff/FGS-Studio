@@ -2,6 +2,15 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {addRow, newDocument, parse, validate} from "../src/fgs.js";
+import {render} from "../src/render.js";
+import {previewHtml} from "../src/forge-preview.js";
+import {createPrintEngine, PROFILE} from "../vendor/fgs-renderer/browser.mjs";
+
+test("accent picker sits with page controls", () => {
+  const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+  assert.ok(html.indexOf('id="orientation"') < html.indexOf('id="accent"'));
+  assert.ok(html.indexOf('id="accent"') < html.indexOf('id="undo"'));
+});
 
 test("a new FGS 1.0 document validates and survives JSON export/import", () => {
   const sheet = newDocument();
@@ -49,4 +58,55 @@ test("duplicate JSON keys are rejected before import", () => {
 test("the portable example fixture imports", () => {
   const source = readFileSync(new URL("./fixtures/example.fgs", import.meta.url), "utf8");
   assert.equal(parse(source).title, "Example GameSheet");
+});
+test("a dense five-section score sheet fits the same Letter page as Forge", () => {
+  const sheet = parse(readFileSync(new URL("./fixtures/dense-score-sheet.fgs", import.meta.url), "utf8"));
+  const painted = [];
+  const context = {
+    setTransform(){}, fillRect(){}, fillText(value){painted.push(value);}, beginPath(){}, moveTo(){}, lineTo(){}, stroke(){}, strokeRect(){},
+    measureText(value) { return {width:value.length * 5}; },
+  };
+  const canvas = {getContext() {return context;}};
+  assert.equal(render(sheet, canvas).fits, true);
+  assert.equal(canvas.width, 1224);
+  assert.ok(painted.includes("Game"), "paired six-player headings wrap instead of shrinking to illegibility");
+  assert.ok(painted.includes("Column 1 Total x 1"), "paired two-player table has room for its labels");
+  sheet.rows.at(-1).blocks[0].score_rows.push(...Array.from({length:14}, (_, i) => `Extra ${i + 1}`));
+  assert.equal(render(sheet, canvas).fits, false);
+});
+test("Forge-derived preview uses bold category cells and paired sections", () => {
+  const sheet = parse(readFileSync(new URL("./fixtures/dense-score-sheet.fgs", import.meta.url), "utf8"));
+  const html = previewHtml(sheet);
+  assert.match(html, /<tr class="score"><th>Ones, Count\/Add Ones<\/th>/);
+  assert.match(html, /<tr class="total"><th>Total<small class="preview-calculated">Calculated<\/small><\/th>/);
+  assert.match(html, /<div class="preview-row columns-2">/);
+  sheet.rows[0].blocks[0].title = "<script>bad</script>";
+  assert.match(previewHtml(sheet), /&lt;script&gt;bad&lt;\/script&gt;/);
+});
+
+test("active Studio preview and PDF share one layout with bold category labels", async () => {
+  const root = new URL("../vendor/fgs-renderer/fonts/", import.meta.url);
+  const fonts = {
+    sans: new Uint8Array(readFileSync(new URL("NotoSans-Regular.ttf", root))),
+    bold: new Uint8Array(readFileSync(new URL("NotoSans-Bold.ttf", root))),
+    serif: new Uint8Array(readFileSync(new URL("NotoSerif-Bold.ttf", root))),
+  };
+  const engine = createPrintEngine(fonts);
+  const sheet = parse(readFileSync(new URL("./fixtures/dense-score-sheet.fgs", import.meta.url), "utf8"));
+  const layout = engine.layout(sheet);
+  assert.equal(layout.profile, PROFILE.id);
+  assert.equal(layout.profile, "fgs-page-1.0");
+  assert.equal(layout.fits, true);
+  assert.equal(layout.commands.find((command) => command.value === "Triple Yahtzee").color, sheet.theme.accent);
+  assert.equal(layout.commands.find((command) => command.value === "Upper Section").color, sheet.theme.accent);
+  assert.equal(layout.commands.find((command) => command.value === "Ones, Count/Add Ones").font, "bold");
+  assert.match(engine.toSvg(layout), /font-family="FGS bold"[^>]*>Ones, Count\/Add Ones<\/text>/);
+  const pdf = await engine.toPdf(layout, sheet.title);
+  assert.equal(new TextDecoder("latin1").decode(pdf.slice(0, 8)), "%PDF-1.7");
+
+  sheet.page.orientation = "landscape";
+  const landscape = engine.layout(sheet);
+  assert.equal(landscape.fits, false);
+  assert.equal(landscape.overflow, "Section Totals");
+  await assert.rejects(engine.toPdf(landscape, sheet.title), /does not fit/);
 });

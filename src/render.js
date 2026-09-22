@@ -4,6 +4,9 @@ const sizes = {letter:[612,792],a4:[595.28,841.89]};
 const margin = 36;
 const gap = 16;
 const rowGap = 14;
+// Match Forge's FGS v1 PDF geometry; taller rows falsely rejected valid sheets.
+const tableTitleHeight = 22;
+const tableRowHeight = 19;
 
 function wrap(context, text, maxWidth) {
   const output = [];
@@ -30,14 +33,48 @@ function linesFor(context, value, width, size = 10, bold = false) {
   return wrap(context, value, width).length;
 }
 function scoreRows(block) { return block.show_total ? [...block.score_rows, block.total_label] : block.score_rows; }
+function calculated(label) { return /^(grand total|total)$/i.test(label.trim()); }
+function tableLayout(context, block, width) {
+  const labels = scoreRows(block);
+  const labelWidth = Math.max(68, width * (width < 350 && block.players.length <= 2 ? .5 : .26));
+  const columnWidth = (width - labelWidth) / block.players.length;
+  const playerLines = block.players.map((player, index) => {
+    context.font = "bold 8px Arial, sans-serif";
+    return wrap(context, player || `Player ${index + 1}`, columnWidth - 8);
+  });
+  const headerHeight = Math.max(tableRowHeight, ...playerLines.map((lines) => lines.length * 10 + 8));
+  const labelLines = labels.map((label) => {
+    context.font = "8.5px Arial, sans-serif";
+    return wrap(context, label, labelWidth - 10);
+  });
+  const rowHeights = labelLines.map((lines, index) => Math.max(tableRowHeight, lines.length * 10 + 6 + (calculated(labels[index]) ? 7 : 0)));
+  return {labels, labelWidth, columnWidth, playerLines, labelLines, headerHeight, rowHeights,
+    height:tableTitleHeight + headerHeight + rowHeights.reduce((sum, height) => sum + height, 0)};
+}
+function drawCell(context, lines, x, top, width, height, {size = 8.5, bold = false, center = false, marker = false} = {}) {
+  context.font = `${bold ? "bold " : ""}${size}px Arial, sans-serif`;
+  context.fillStyle = "#242424";
+  context.textAlign = center ? "center" : "left";
+  const baseline = top + Math.max(size + 2, (height - lines.length * 10 - (marker ? 7 : 0)) / 2 + size);
+  lines.forEach((line, index) => context.fillText(line, x, baseline + index * 10, width));
+  if (marker) {
+    context.font = "bold 5px Arial, sans-serif";
+    context.fillStyle = "#555";
+    context.fillText("CALCULATED", x, top + height - 3, width);
+  }
+  context.textAlign = "left";
+}
 function measure(context, block, width) {
-  if (block.type === "header") return block.subtitle ? 59 : 41;
-  if (block.type === "score_table") return 25 + (scoreRows(block).length + 1) * 24;
-  if (block.type === "notes") return 28 + block.lines * 23;
-  return 29 + block.items.reduce((sum, item) => sum + Math.max(17, linesFor(context, item, width - 36) * 14 + 3), 0);
+  if (block.type === "header") return block.subtitle ? 54 : 40;
+  if (block.type === "score_table") return tableLayout(context, block, width).height;
+  if (block.type === "notes") return 27 + block.lines * 24;
+  const textWidth = Math.max(90, width - (block.type === "checklist" ? 28 : 18));
+  return 27 + block.items.reduce((sum, item) => sum + Math.max(1, linesFor(context, item, textWidth, 9.5)) * 13 + 3, 0);
 }
 function heading(context, title, x, y, width, accent) {
-  text(context, title, x, y + 14, width, 12, true);
+  context.font = "bold 12px Georgia, serif";
+  context.fillStyle = "#171717";
+  context.fillText(title, x, y + 14, width);
   context.strokeStyle = accent;
   context.lineWidth = 1.2;
   context.beginPath(); context.moveTo(x, y + 21); context.lineTo(x + width, y + 21); context.stroke();
@@ -45,32 +82,37 @@ function heading(context, title, x, y, width, accent) {
 function drawBlock(context, block, x, y, width, accent) {
   if (block.type === "header") {
     context.textAlign = "center";
-    text(context, block.title, x + width / 2, y + 25, width - 10, 21, true);
-    if (block.subtitle) text(context, block.subtitle, x + width / 2, y + 47, width - 10, 10);
+    context.font = "bold 20px Georgia, serif";
+    context.fillStyle = "#171717";
+    context.fillText(block.title, x + width / 2, y + 25, width - 10);
+    if (block.subtitle) text(context, block.subtitle, x + width / 2, y + 43, width - 10, 10);
     context.textAlign = "left";
     return;
   }
   heading(context, block.title, x, y, width, accent);
   if (block.type === "score_table") {
-    const labels = scoreRows(block);
-    const top = y + 25;
-    const labelWidth = Math.max(90, width * .28);
-    const colWidth = (width - labelWidth) / block.players.length;
+    const layout = tableLayout(context, block, width);
+    const top = y + tableTitleHeight;
+    const boundaries = [top, top + layout.headerHeight];
+    layout.rowHeights.forEach((height) => boundaries.push(boundaries.at(-1) + height));
+    layout.labels.forEach((label, index) => {
+      if (!calculated(label)) return;
+      context.fillStyle = "#f1f0ec";
+      context.fillRect(x, boundaries[index + 1], width, layout.rowHeights[index]);
+    });
+    drawCell(context, ["Category"], x + 5, top, layout.labelWidth - 10, layout.headerHeight, {bold:true});
+    layout.playerLines.forEach((lines, index) => drawCell(context, lines, x + layout.labelWidth + (index + .5) * layout.columnWidth, top, layout.columnWidth - 8, layout.headerHeight, {size:8,bold:true,center:true}));
+    layout.labelLines.forEach((lines, index) => drawCell(context, lines, x + 5, boundaries[index + 1], layout.labelWidth - 10, layout.rowHeights[index], {bold:calculated(layout.labels[index]),marker:calculated(layout.labels[index])}));
     context.strokeStyle = "#333"; context.lineWidth = .5;
-    for (let row = 0; row <= labels.length + 1; row++) {
-      context.beginPath(); context.moveTo(x, top + row * 24); context.lineTo(x + width, top + row * 24); context.stroke();
-    }
-    const verticals = [x, x + labelWidth, ...Array.from({length:block.players.length}, (_, index) => x + labelWidth + (index + 1) * colWidth)];
-    verticals.forEach((line) => {context.beginPath();context.moveTo(line,top);context.lineTo(line,top+(labels.length+1)*24);context.stroke();});
-    text(context, "Category", x + 5, top + 15, labelWidth - 10, 9, true);
-    block.players.forEach((player, index) => text(context, player || `Player ${index + 1}`, x + labelWidth + index * colWidth + 4, top + 15, colWidth - 8, 8, true));
-    labels.forEach((label, index) => text(context, label, x + 5, top + (index + 1) * 24 + 15, labelWidth - 10, 9, true));
+    boundaries.forEach((line) => {context.beginPath();context.moveTo(x,line);context.lineTo(x+width,line);context.stroke();});
+    const verticals = [x, x + layout.labelWidth, ...Array.from({length:block.players.length}, (_, index) => x + layout.labelWidth + (index + 1) * layout.columnWidth)];
+    verticals.forEach((line) => {context.beginPath();context.moveTo(line,top);context.lineTo(line,boundaries.at(-1));context.stroke();});
     return;
   }
   if (block.type === "notes") {
     context.strokeStyle = "#777";context.lineWidth = .5;
     for (let index = 0; index < block.lines; index++) {
-      const line = y + 29 + index * 23;
+      const line = y + 29 + index * 24;
       context.beginPath();context.moveTo(x,line);context.lineTo(x+width,line);context.stroke();
     }
     return;

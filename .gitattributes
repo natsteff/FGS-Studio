@@ -1,0 +1,2 @@
+# Preserve generated renderer bundles and third-party notices verbatim.
+vendor/fgs-renderer/** -whitespace
