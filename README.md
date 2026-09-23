@@ -17,6 +17,11 @@ tab. Download the `.fgs` file to keep an editable copy; download PDF for
 printing. Closing or reloading the tab loses unsaved edits. FGS documents are
 not transmitted to the host or any API.
 
+The static page uses a restrictive Content Security Policy to limit active
+content to same-origin files. The included Pages workflow publishes static files
+without app-defined response headers, so the policy is in an HTML meta tag; it
+cannot set `frame-ancestors` or replace the host's TLS and header controls.
+
 ## First proof-of-concept scope
 
 - Create and edit FGS 1.0/1.1 headers, score tables, references, checklists, and
