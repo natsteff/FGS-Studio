@@ -11,6 +11,18 @@ test("accent picker sits with page controls", () => {
   assert.ok(html.indexOf('id="orientation"') < html.indexOf('id="accent"'));
   assert.ok(html.indexOf('id="accent"') < html.indexOf('id="undo"'));
 });
+test("editor and its format module use the current cache key", () => {
+  const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+  const editor = readFileSync(new URL("../src/editor.js", import.meta.url), "utf8");
+  const styles = readFileSync(new URL("../styles.css", import.meta.url), "utf8");
+  const version = html.match(/src\/editor\.js\?v=(\d+)/)?.[1];
+  assert.ok(version, "the HTML must version the editor entry point");
+  assert.match(editor, new RegExp(`\\./fgs\\.js\\?v=${version}\\b`));
+  assert.match(html, /<h2>Footer<\/h2>/);
+  assert.match(editor, /button\("Choose logo"/);
+  assert.match(editor, /upload\.hidden=true/);
+  assert.match(styles, /#footer\{display:block;width:100%/);
+});
 
 test("a new FGS 1.0 document validates and survives JSON export/import", () => {
   const sheet = newDocument();
@@ -28,11 +40,30 @@ test("namespaced extensions survive round trip", () => {
   sheet.rows[0].blocks[0].extensions = {"org.example.meta": [1,"two"]};
   assert.deepEqual(parse(JSON.stringify(sheet)), sheet);
 });
+test("FGS 1.1 footer and one bounded header logo survive import", () => {
+  const sheet = newDocument();
+  sheet.format_version="1.1";
+  sheet.footer = "Created by Example\n2026";
+  sheet.rows[0].blocks[0].logo = {
+    media_type:"image/png",
+    data:"iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAYAAAD0In+KAAAAEUlEQVR4nGP8z8Dwn4GBgQEADQUCAOAHawIAAAAASUVORK5CYII=",
+    alt:"Example logo",decorative:false,
+  };
+  assert.deepEqual(parse(JSON.stringify(sheet)),sheet);
+  const animated=structuredClone(sheet);
+  const bytes=Buffer.from(animated.rows[0].blocks[0].logo.data,"base64");
+  animated.rows[0].blocks[0].logo.data=Buffer.concat([bytes.subarray(0,33),Buffer.from([0,0,0,0,97,99,84,76,0,0,0,0]),bytes.subarray(33)]).toString("base64");
+  assert.throws(()=>validate(animated),/animated PNG/);
+  const old=structuredClone(sheet);old.format_version="1.0";
+  assert.throws(()=>validate(old),/unknown property footer/);
+  sheet.footer="one\ntwo\nthree";
+  assert.throws(()=>validate(sheet),/one or two/);
+});
 test("unknown versions, properties and block types are rejected", () => {
   const sheet = newDocument();
+  sheet.format_version = "1.2";
+  assert.throws(() => validate(sheet), /only FGS 1.0 and 1.1/);
   sheet.format_version = "1.1";
-  assert.throws(() => validate(sheet), /only FGS 1.0/);
-  sheet.format_version = "1.0";
   sheet.unknown = true;
   assert.throws(() => validate(sheet), /unknown property/);
   delete sheet.unknown;
@@ -95,7 +126,7 @@ test("active Studio preview and PDF share one layout with bold category labels",
   const sheet = parse(readFileSync(new URL("./fixtures/dense-score-sheet.fgs", import.meta.url), "utf8"));
   const layout = engine.layout(sheet);
   assert.equal(layout.profile, PROFILE.id);
-  assert.equal(layout.profile, "fgs-page-1.0");
+  assert.equal(layout.profile, "fgs-page-1.1");
   assert.equal(layout.fits, true);
   assert.equal(layout.commands.find((command) => command.value === "Triple Yahtzee").color, sheet.theme.accent);
   assert.equal(layout.commands.find((command) => command.value === "Upper Section").color, sheet.theme.accent);

@@ -1,4 +1,4 @@
-export const VERSION = "1.0";
+export const VERSION = "1.1";
 export const MAX_BYTES = 256 * 1024;
 const idPattern = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
 const extensionPattern = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/;
@@ -31,16 +31,40 @@ function uniqueId(value, path, seen) {
   if (seen.has(value)) fail(path, "duplicate ID");
   seen.add(value);
 }
-function block(value, path, seen) {
+function logo(value, path) {
+  keys(value, ["media_type","data","alt","decorative"], ["media_type","data","alt","decorative"], path);
+  if (value.media_type !== "image/png" || typeof value.decorative !== "boolean") fail(path, "must be a PNG with a decorative flag");
+  string(value.alt, `${path}.alt`, 0, 120);
+  if (value.decorative ? value.alt !== "" : !value.alt.trim()) fail(path, "describe the logo or mark it decorative");
+  if (typeof value.data !== "string" || value.data.length > 174_768 || !/^[A-Za-z0-9+/]*={0,2}$/.test(value.data)) fail(path, "invalid or oversized PNG data");
+  let bytes;
+  try {bytes = atob(value.data);} catch {fail(path, "invalid PNG base64");}
+  if (btoa(bytes) !== value.data || bytes.length > 128*1024 || bytes.length < 24 || bytes.slice(0,8) !== "\x89PNG\r\n\x1a\n" || bytes.slice(12,16) !== "IHDR") fail(path, "invalid PNG content");
+  const dimension = (offset) => (((bytes.charCodeAt(offset)*256+bytes.charCodeAt(offset+1))*256+bytes.charCodeAt(offset+2))*256+bytes.charCodeAt(offset+3));
+  const width = dimension(16), height = dimension(20);
+  if (!width || !height || width > 1024 || height > 1024 || width*height > 1_000_000) fail(path, "PNG dimensions exceed the limit");
+  let offset = 8;
+  while (offset + 12 <= bytes.length) {
+    const length = dimension(offset);
+    if (length > bytes.length - offset - 12) fail(path, "invalid PNG chunks");
+    if (bytes.slice(offset+4, offset+8) === "acTL") fail(path, "animated PNG logos are unsupported");
+    offset += 12 + length;
+    if (bytes.slice(offset-length-8, offset-length-4) === "IEND") break;
+  }
+}
+function block(value, path, seen, version) {
   object(value, path);
   if (!kinds.has(value.type)) fail(path, "unsupported block type");
   const common = ["id", "type", "title", "extensions"];
-  const fields = {header:["subtitle"],score_table:["players","score_rows","show_total","total_label"],reference:["items"],checklist:["items"],notes:["lines"]}[value.type];
-  keys(value, [...common, ...fields], ["id", "type", "title", ...fields], path);
+  const fields = {header:["subtitle",...(version === "1.1" ? ["logo"] : [])],score_table:["players","score_rows","show_total","total_label"],reference:["items"],checklist:["items"],notes:["lines"]}[value.type];
+  keys(value, [...common, ...fields], ["id", "type", "title", ...fields.filter((field) => field !== "logo")], path);
   uniqueId(value.id, `${path}.id`, seen);
   string(value.title, `${path}.title`, value.type === "header" ? 0 : 1, 160);
   extensions(value.extensions, `${path}.extensions`);
-  if (value.type === "header") string(value.subtitle, `${path}.subtitle`, 0, 240);
+  if (value.type === "header") {
+    string(value.subtitle, `${path}.subtitle`, 0, 240);
+    if (value.logo !== undefined) logo(value.logo, `${path}.logo`);
+  }
   if (value.type === "score_table") {
     list(value.players, `${path}.players`, 1, 12);
     value.players.forEach((item, index) => string(item, `${path}.players[${index}]`, 0, 40));
@@ -57,9 +81,11 @@ function block(value, path, seen) {
 }
 
 export function validate(document) {
-  keys(document, ["format", "format_version", "id", "title", "page", "theme", "rows", "extensions"], ["format", "format_version", "id", "title", "page", "theme", "rows"], "FGS");
+  const isCurrent = document?.format_version === VERSION;
+  keys(document, ["format", "format_version", "id", "title", "page", "theme", "rows", "extensions", ...(isCurrent ? ["footer"] : [])], ["format", "format_version", "id", "title", "page", "theme", "rows"], "FGS");
   if (document.format !== "forge-gamesheets") fail("FGS", "unknown format");
-  if (document.format_version !== VERSION) fail("FGS", `only FGS ${VERSION} is supported`);
+  if (!["1.0", VERSION].includes(document.format_version)) fail("FGS", `only FGS 1.0 and ${VERSION} are supported`);
+  if (document.footer !== undefined && (typeof document.footer !== "string" || document.footer.length < 1 || document.footer.length > 160 || document.footer.split("\n").length > 2 || document.footer.split("\n").some((line) => !line.trim()) || /[\u0000-\u0009\u000b-\u001f\u007f]/.test(document.footer))) fail("FGS.footer", "must be one or two nonempty lines of at most 160 characters");
   const seen = new Set();
   uniqueId(document.id, "FGS.id", seen);
   string(document.title, "FGS.title", 1, 160);
@@ -73,16 +99,18 @@ export function validate(document) {
   extensions(document.extensions, "FGS.extensions");
   list(document.rows, "FGS.rows", 1, 30);
   let blocks = 0;
+  let logos = 0;
   document.rows.forEach((row, index) => {
     const path = `FGS.rows[${index}]`;
     keys(row, ["id", "blocks", "extensions"], ["id", "blocks"], path);
     uniqueId(row.id, `${path}.id`, seen);
     extensions(row.extensions, `${path}.extensions`);
     list(row.blocks, `${path}.blocks`, 1, 2);
-    row.blocks.forEach((item, number) => block(item, `${path}.blocks[${number}]`, seen));
+    row.blocks.forEach((item, number) => {block(item, `${path}.blocks[${number}]`, seen, document.format_version);if (item.logo) logos++;});
     blocks += row.blocks.length;
   });
   if (blocks > 40) fail("FGS", "too many blocks");
+  if (logos > 1) fail("FGS", "only one header logo is allowed");
   if (new TextEncoder().encode(JSON.stringify(document)).length > MAX_BYTES) fail("FGS", "exceeds 256 KiB");
   return document;
 }
@@ -137,6 +165,18 @@ export function parse(text) {
   return validate(document);
 }
 
+export async function verifyLogoImages(document) {
+  for (const row of document.rows) for (const block of row.blocks) if (block.logo) {
+    const bytes=Uint8Array.from(atob(block.logo.data),ch=>ch.charCodeAt(0));
+    let image;
+    try {image=await createImageBitmap(new Blob([bytes],{type:"image/png"}));}
+    catch {throw new Error("The header logo is not a decodable PNG.");}
+    try {
+      if (image.width>1024 || image.height>1024 || image.width*image.height>1_000_000) throw new Error("The header logo exceeds the pixel limit.");
+    } finally {image.close();}
+  }
+}
+
 const newId = (prefix) => `${prefix}-${crypto.randomUUID()}`;
 export function newBlock(type) {
   const id = newId("block");
@@ -148,7 +188,7 @@ export function newBlock(type) {
   throw new Error("Unknown block type");
 }
 export function newDocument() {
-  return {format:"forge-gamesheets",format_version:VERSION,id:newId("sheet"),title:"Untitled GameSheet",page:{size:"letter",orientation:"portrait"},theme:{accent:"#c84b24"},rows:[{id:newId("row"),blocks:[newBlock("header")]},{id:newId("row"),blocks:[newBlock("score_table")]}]};
+  return {format:"forge-gamesheets",format_version:"1.0",id:newId("sheet"),title:"Untitled GameSheet",page:{size:"letter",orientation:"portrait"},theme:{accent:"#c84b24"},rows:[{id:newId("row"),blocks:[newBlock("header")]},{id:newId("row"),blocks:[newBlock("score_table")]}]};
 }
 export function addRow(document, type) {
   document.rows.push({id:newId("row"),blocks:[newBlock(type)]});

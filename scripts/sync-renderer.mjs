@@ -6,7 +6,7 @@ import {dirname,join,resolve} from "node:path";
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const source=resolve(root,"../Forge-GameSheets/packages/fgs-renderer/dist");
 const manifest=JSON.parse(await readFile(join(source,"manifest.json"),"utf8"));
-if(manifest.profile!=="fgs-page-1.0") throw new Error("Unexpected FGS Page Rendering Profile");
+if(manifest.profile!=="fgs-page-1.1") throw new Error("Unexpected FGS Page Rendering Profile");
 for(const [file,expected] of Object.entries(manifest.sourceFiles)) {
   const actual=createHash("sha256").update(await readFile(join(source,"..",file))).digest("hex");
   if(actual!==expected) throw new Error(`Renderer source changed since the build: ${file}`);

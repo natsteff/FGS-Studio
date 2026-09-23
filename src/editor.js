@@ -1,6 +1,6 @@
-import {addRow, fileStem, newBlock, newDocument, parse, validate} from "./fgs.js";
+import {addRow, fileStem, newBlock, newDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=11";
 import {createEditHistory} from "./history.js";
-import {loadPrintEngine} from "../vendor/fgs-renderer/browser.mjs?profile=fgs-page-1.0";
+import {loadPrintEngine, prepareHeaderLogo} from "../vendor/fgs-renderer/browser.mjs?profile=fgs-page-1.1&layout=2";
 
 let documentModel = newDocument();
 let selectedId = documentModel.rows[0].blocks[0].id;
@@ -88,7 +88,30 @@ function blockEditor(block, row, rowIndex, blockIndex) {
   const card = element("div", {className:"block-card"});
   const fields = element("div", {className:"block-fields"});
   fields.append(field("Heading", block.title, (value) => {block.title=value;refreshSections();}, {max:160}));
-  if (block.type === "header") fields.append(field("Subtitle", block.subtitle, (value) => {block.subtitle=value;}, {max:240}));
+  if (block.type === "header") {
+    fields.append(field("Subtitle", block.subtitle, (value) => {block.subtitle=value;}, {max:240}));
+    const upload = element("input");
+    upload.type="file";upload.accept="image/png,image/jpeg";upload.hidden=true;
+    const uploadControl=element("div",{className:"logo-upload"});
+    uploadControl.append(element("span",{text:"Header logo (PNG or JPEG)"}));
+    uploadControl.append(button("Choose logo",()=>upload.click(),"secondary"));
+    uploadControl.append(upload);
+    uploadControl.append(element("small",{text:block.logo?"Current logo attached":"No logo selected"}));
+    fields.append(uploadControl);
+    fields.append(field("Logo description (blank if decorative)",block.logo?.alt||"",(value)=>{
+      if (block.logo) {block.logo.alt=value.trim();block.logo.decorative=!block.logo.alt;}
+    },{max:120}));
+    upload.addEventListener("change",async()=>{
+      if (!upload.files[0]) return;
+      try {
+        const alt=fields.querySelector('input[maxlength="120"]').value.trim();
+        const logo=await prepareHeaderLogo(upload.files[0],alt,!alt);
+        edit(()=>{documentModel.format_version="1.1";documentModel.rows.flatMap((row)=>row.blocks).forEach((item)=>{if(item.id!==block.id) delete item.logo;});block.logo=logo;});
+        refreshProperties();refreshPreview();
+      } catch(error) {status(error.message,true);}
+    });
+    if (block.logo) fields.append(button("Remove logo",()=>{edit(()=>{delete block.logo;});refreshProperties();refreshPreview();}));
+  }
   if (block.type === "score_table") {
     fields.append(field("Players — one per line (1–12)", block.players.join("\n"), (value) => {block.players=lines(value);}, {multiline:true}));
     fields.append(field("Score rows — one per line (1–30)", block.score_rows.join("\n"), (value) => {block.score_rows=lines(value);}, {multiline:true}));
@@ -129,6 +152,7 @@ function refreshProperties() {
       if (documentModel.rows.length >= 30) return status("FGS v1 allows at most 30 rows.", true);
       const copy = structuredClone(block);
       copy.id = `block-${crypto.randomUUID()}`;
+      delete copy.logo;
       documentModel.rows.splice(rowIndex + 1, 0, {id:`row-${crypto.randomUUID()}`,blocks:[copy]});
       selectedId = copy.id;refresh();
     }), "secondary"));
@@ -177,6 +201,7 @@ function refresh() {
   byId("page-size").value = documentModel.page.size;
   byId("orientation").value = documentModel.page.orientation;
   byId("accent").value = documentModel.theme.accent;
+  byId("footer").value = documentModel.footer || "";
   historyButtons();
   refreshSections(); refreshProperties(); refreshPreview();
 }
@@ -192,6 +217,11 @@ focusedEdit(byId("title"), "input", (input) => {documentModel.title=input.value;
 byId("page-size").addEventListener("change", (event) => {edit(() => {documentModel.page.size=event.target.value;});refreshPreview();});
 byId("orientation").addEventListener("change", (event) => {edit(() => {documentModel.page.orientation=event.target.value;});refreshPreview();});
 focusedEdit(byId("accent"), "input", (input) => {documentModel.theme.accent=input.value;});
+focusedEdit(byId("footer"), "change", (input) => {
+  const footer = input.value.trim();
+  if (footer) {documentModel.format_version="1.1";documentModel.footer=footer;}
+  else delete documentModel.footer;
+});
 byId("undo").addEventListener("click", () => restore(history.undo(snapshot())));
 byId("redo").addEventListener("click", () => restore(history.redo(snapshot())));
 byId("add").addEventListener("click", () => {
@@ -208,6 +238,7 @@ byId("import").addEventListener("change", async (event) => {
   try {
     if (file.size > 256 * 1024) throw new Error("FGS exceeds 256 KiB");
     const imported = parse(await file.text());
+    await verifyLogoImages(imported);
     documentModel = imported; selectedId=imported.rows[0].blocks[0].id;history.clear();refresh(); status(`Imported ${file.name}.`);
   } catch (error) {status(error.message, true);}
   event.target.value = "";

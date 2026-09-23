@@ -46,6 +46,10 @@ button:disabled{opacity:.55;cursor:not-allowed;filter:none}
 .property-actions .danger{background:#fff;color:#a12e20;border-color:#a12e20}
 .accent-control{margin-top:1rem}
 .accent-control input{width:4rem}
+.logo-upload{display:grid;gap:.4rem;font-size:.88rem;font-weight:700}
+.logo-upload button{justify-self:start}
+.logo-upload small{color:#68635c;font-size:.76rem;font-weight:500}
+#footer{display:block;width:100%;min-height:5rem;resize:vertical}
 .preview-heading .accent-control{margin-top:0}
 @media(max-width:1150px){.topbar{grid-template-columns:auto 1fr}.topbar nav{grid-column:1/-1;justify-content:flex-start}}
 @media(max-width:900px){.topbar{display:flex}.topbar nav{justify-content:flex-start}}

@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FGS Studio</title>
-  <link rel="stylesheet" href="styles.css?v=8">
-  <script type="module" src="src/editor.js?v=8"></script>
+  <link rel="stylesheet" href="styles.css?v=11">
+  <script type="module" src="src/editor.js?v=11"></script>
 </head>
 <body>
   <header class="topbar">
@@ -30,6 +30,9 @@
       <h2 id="properties-title">Section</h2>
       <div id="properties" class="properties"></div>
       <hr>
+      <h2>Footer</h2>
+      <label>Optional credit (one or two lines)<textarea id="footer" rows="2" maxlength="160" placeholder="Created by …"></textarea></label>
+      <hr>
       <p class="hint">A row may contain one full-width section or two side by side.</p>
     </section>
     <section class="preview-area" aria-label="Page preview">
@@ -44,6 +47,6 @@
       <div id="preview" class="sheet-preview" aria-label="Printable sheet preview"></div>
     </section>
   </main>
-  <footer>FGS Studio proof of concept · FGS 1.0 · Browser-only editing</footer>
+  <footer>FGS Studio proof of concept · FGS 1.0/1.1 · Browser-only editing</footer>
 </body>
 </html>
