@@ -1,4 +1,5 @@
-export const VERSION = "1.2";
+import {validateContent,validateFill,newContent} from "../vendor/fgs-renderer/browser.mjs";
+export const VERSION = "1.3";
 export const MAX_BYTES = 256 * 1024;
 const idPattern = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
 const extensionPattern = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/;
@@ -54,9 +55,13 @@ function logo(value, path) {
 }
 function block(value, path, seen, version) {
   object(value, path);
+  if (["tracker","paper_pattern"].includes(value.type)) {
+    if(version!=="1.3")fail(path,"requires FGS 1.3");
+    validateContent(value);uniqueId(value.id,`${path}.id`,seen);string(value.title,`${path}.title`,value.type==="paper_pattern"?0:1,160);extensions(value.extensions,`${path}.extensions`);return;
+  }
   if (!kinds.has(value.type)) fail(path, "unsupported block type");
   const common = ["id", "type", "title", "extensions"];
-  const fields = {header:["subtitle",...(version !== "1.0" ? ["logo"] : [])],score_table:["players","score_rows","show_total","total_label",...(version === "1.2" ? ["first_column_heading"] : [])],reference:["items"],checklist:["items"],notes:["lines"]}[value.type];
+  const fields = {header:["subtitle",...(version !== "1.0" ? ["logo"] : [])],score_table:["players","score_rows","show_total","total_label",...(["1.2","1.3"].includes(version) ? ["first_column_heading"] : [])],reference:["items"],checklist:["items"],notes:["lines"]}[value.type];
   keys(value, [...common, ...fields], ["id", "type", "title", ...fields.filter((field) => !["logo", "first_column_heading"].includes(field))], path);
   uniqueId(value.id, `${path}.id`, seen);
   string(value.title, `${path}.title`, value.type === "header" ? 0 : 1, 160);
@@ -82,10 +87,10 @@ function block(value, path, seen, version) {
 }
 
 export function validate(document) {
-  const isCurrent = document?.format_version === VERSION;
-  keys(document, ["format", "format_version", "id", "title", "page", "theme", "rows", "extensions", ...(["1.1", VERSION].includes(document?.format_version) ? ["footer"] : []), ...(isCurrent ? ["designer_notes"] : [])], ["format", "format_version", "id", "title", "page", "theme", "rows"], "FGS");
+  const isCurrent = ["1.2",VERSION].includes(document?.format_version);
+  keys(document, ["format", "format_version", "id", "title", "page", "theme", "rows", "extensions", ...(["1.1","1.2", VERSION].includes(document?.format_version) ? ["footer"] : []), ...(isCurrent ? ["designer_notes"] : [])], ["format", "format_version", "id", "title", "page", "theme", "rows"], "FGS");
   if (document.format !== "forge-gamesheets") fail("FGS", "unknown format");
-  if (!["1.0", "1.1", VERSION].includes(document.format_version)) fail("FGS", `only FGS 1.0, 1.1 and ${VERSION} are supported`);
+  if (!["1.0", "1.1","1.2", VERSION].includes(document.format_version)) fail("FGS", `only FGS 1.0–${VERSION} are supported`);
   if (document.designer_notes !== undefined && (typeof document.designer_notes !== "string" || [...document.designer_notes].length > 4000 || /[\u0000-\u0008\u000b-\u001f\u007f]/.test(document.designer_notes))) fail("FGS.designer_notes", "must be plain text of at most 4000 characters");
   if (document.footer !== undefined && (typeof document.footer !== "string" || document.footer.length < 1 || document.footer.length > 160 || document.footer.split("\n").length > 2 || document.footer.split("\n").some((line) => !line.trim()) || /[\u0000-\u0009\u000b-\u001f\u007f]/.test(document.footer))) fail("FGS.footer", "must be one or two nonempty lines of at most 160 characters");
   const seen = new Set();
@@ -112,6 +117,7 @@ export function validate(document) {
     blocks += row.blocks.length;
   });
   if (blocks > 40) fail("FGS", "too many blocks");
+  validateFill(document);
   if (logos > 1) fail("FGS", "only one header logo is allowed");
   if (new TextEncoder().encode(JSON.stringify(document)).length > MAX_BYTES) fail("FGS", "exceeds 256 KiB");
   return document;
@@ -182,6 +188,7 @@ export async function verifyLogoImages(document) {
 const newId = (prefix) => `${prefix}-${crypto.randomUUID()}`;
 export function newBlock(type) {
   const id = newId("block");
+  if(["tracker","paper_pattern"].includes(type))return {id,...newContent(type)};
   if (type === "header") return {id,type,title:"New sheet",subtitle:""};
   if (type === "score_table") return {id,type,title:"Score table",players:["Player 1","Player 2"],score_rows:["Round 1","Round 2","Total"],show_total:false,total_label:"Total"};
   if (type === "reference") return {id,type,title:"Reference",items:["First reminder"]};
@@ -194,5 +201,6 @@ export function newDocument() {
 }
 export function addRow(document, type) {
   document.rows.push({id:newId("row"),blocks:[newBlock(type)]});
+  if(["tracker","paper_pattern"].includes(type))document.format_version="1.3";
 }
 export function fileStem(title) { return title.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "game-sheet"; }

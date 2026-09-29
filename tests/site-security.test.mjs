@@ -20,3 +20,8 @@ test("the static editor limits active content to local assets", () => {
   assert.match(html, /<meta name="referrer" content="no-referrer">/);
   assert.doesNotMatch(html, /<script[^>]+src="https?:\/\//);
 });
+
+test("the footer links to the full Forge GameSheets project", () => {
+  assert.match(html, /<footer><a href="https:\/\/github\.com\/natsteff\/forge-gamesheets" target="_blank" rel="noopener noreferrer">Full Forge GameSheets on GitHub ↗<\/a><\/footer>/);
+  assert.doesNotMatch(html, /FGS Studio · FGS 1\.0/);
+});

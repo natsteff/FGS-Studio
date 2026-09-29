@@ -1,6 +1,6 @@
-import {addRow, fileStem, newBlock, newDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=12";
+import {addRow, fileStem, newBlock, newDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=13";
 import {createEditHistory} from "./history.js";
-import {loadPrintEngine, prepareHeaderLogo} from "../vendor/fgs-renderer/browser.mjs?profile=fgs-page-1.2&layout=2";
+import {loadPrintEngine, prepareHeaderLogo,contentControls,validateFill,applyPaperTemplate} from "../vendor/fgs-renderer/browser.mjs?profile=fgs-page-1.3&layout=3";
 
 let documentModel = newDocument();
 let selectedId = documentModel.rows[0].blocks[0].id;
@@ -18,7 +18,7 @@ function historyButtons() {
 function edit(change) {
   history.finish(snapshot());
   const before = structuredClone(snapshot());
-  change();
+  try {change();validateFill(documentModel);} catch(error){documentModel=before.document;selectedId=before.selectedId;refresh();status(error.message,true);return;}
   history.record(before, snapshot());
   historyButtons();
 }
@@ -91,7 +91,7 @@ function blockEditor(block, row, rowIndex, blockIndex) {
   if (block.type === "score_table") fields.append(field("First column heading", block.first_column_heading ?? "Category", (value) => {
     const heading = value.trim() || "Category";
     if (heading === "Category") delete block.first_column_heading;
-    else {documentModel.format_version="1.2";block.first_column_heading=heading;}
+    else {if(documentModel.format_version!=="1.3")documentModel.format_version="1.2";block.first_column_heading=heading;}
   }, {max:80}));
   if (block.type === "header") {
     fields.append(field("Subtitle", block.subtitle, (value) => {block.subtitle=value;}, {max:240}));
@@ -125,6 +125,7 @@ function blockEditor(block, row, rowIndex, blockIndex) {
   }
   if (block.type === "reference" || block.type === "checklist") fields.append(field("Items — one per line (1–30)", block.items.join("\n"), (value) => {block.items=lines(value);}, {multiline:true}));
   if (block.type === "notes") fields.append(field("Writing lines (1–20)", block.lines, (value) => {block.lines=Number(value);}, {type:"number",min:1,high:20}));
+  if(["tracker","paper_pattern"].includes(block.type))fields.append(contentControls(block,{canFill:row.blocks.length===1&&rowIndex===documentModel.rows.length-1,change:next=>edit(()=>{row.blocks[row.blocks.indexOf(block)]=next;refresh();}),onError:error=>status(error,true)}));
   card.append(fields);
   return card;
 }
@@ -179,6 +180,12 @@ function refreshProperties() {
       refresh();
     }), "secondary danger"));
     properties.append(actions);
+    if (documentModel.rows.length === 1 && row.blocks.length === 1) {
+      const notice = element("div", {className:"section-notice"});
+      notice.setAttribute("role", "note");
+      notice.append(element("strong", {text:"Section cannot be deleted"}), element("span", {text:"This is the only section. Add another section before deleting it."}));
+      properties.append(notice);
+    }
     return;
   }
   byId("properties-title").textContent = "Section";
@@ -229,7 +236,7 @@ focusedEdit(byId("footer"), "change", (input) => {
   else delete documentModel.footer;
 });
 focusedEdit(byId("designer-notes"), "input", (input) => {
-  if (input.value) {documentModel.format_version="1.2";documentModel.designer_notes=input.value;}
+  if (input.value) {if(documentModel.format_version!=="1.3")documentModel.format_version="1.2";documentModel.designer_notes=input.value;}
   else delete documentModel.designer_notes;
 });
 byId("undo").addEventListener("click", () => restore(history.undo(snapshot())));
@@ -239,8 +246,15 @@ byId("add").addEventListener("click", () => {
   edit(() => {addRow(documentModel, byId("block-type").value); selectedId=documentModel.rows.at(-1).blocks[0].id;refresh();});
 });
 byId("new").addEventListener("click", () => {
-  if (!confirm("Start a new sheet? Download your current FGS first if you want to keep it.")) return;
-  documentModel = newDocument(); selectedId=documentModel.rows[0].blocks[0].id;history.clear();refresh();
+  byId("new-template").value = "score_sheet";
+  byId("new-dialog").showModal();
+});
+byId("cancel-new").addEventListener("click",()=>byId("new-dialog").close());
+byId("new-form").addEventListener("submit",event=>{
+  event.preventDefault();
+  if(!confirm("Start a new sheet? Download your current FGS first if you want to keep it."))return;
+  documentModel=applyPaperTemplate(newDocument(),byId("new-template").value,prefix=>prefix+"-"+crypto.randomUUID());
+  selectedId=documentModel.rows[0].blocks[0].id;history.clear();refresh();byId("new-dialog").close();
 });
 byId("import").addEventListener("change", async (event) => {
   const file = event.target.files[0];

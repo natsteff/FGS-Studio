@@ -64,8 +64,8 @@ test("FGS 1.1 footer and one bounded header logo survive import", () => {
 });
 test("unknown versions, properties and block types are rejected", () => {
   const sheet = newDocument();
-  sheet.format_version = "1.3";
-  assert.throws(() => validate(sheet), /only FGS 1.0, 1.1 and 1.2/);
+  sheet.format_version = "1.4";
+  assert.throws(() => validate(sheet), /only FGS 1.0–1.3/);
   sheet.format_version = "1.1";
   sheet.unknown = true;
   assert.throws(() => validate(sheet), /unknown property/);
@@ -153,7 +153,7 @@ test("active Studio preview and PDF share one layout with bold category labels",
   const sheet = parse(readFileSync(new URL("./fixtures/dense-score-sheet.fgs", import.meta.url), "utf8"));
   const layout = engine.layout(sheet);
   assert.equal(layout.profile, PROFILE.id);
-  assert.equal(layout.profile, "fgs-page-1.2");
+  assert.equal(layout.profile, "fgs-page-1.3");
   assert.equal(layout.fits, true);
   assert.equal(layout.commands.find((command) => command.value === "Triple Yahtzee").color, sheet.theme.accent);
   assert.equal(layout.commands.find((command) => command.value === "Upper Section").color, sheet.theme.accent);

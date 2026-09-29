@@ -1,7 +1,7 @@
 # FGS Studio
 
 FGS Studio is a browser-only proof of concept for creating, importing, editing,
-and exporting FGS 1.0/1.1/1.2 GameSheets. It is an independent application, not a copy
+and exporting FGS 1.0/1.1/1.2/1.3 GameSheets. It is an independent application, not a copy
 of Forge GameSheets. Its source and GitHub Pages site are public.
 
 FGS Studio is licensed under the [GNU Affero General Public License v3.0](LICENSE).
@@ -47,7 +47,7 @@ cannot set `frame-ancestors` or replace the host's TLS and header controls.
 The SVG preview and selectable-text PDF now use one point-based display list
 from a pinned [FGS Renderer](vendor/fgs-renderer/manifest.json) build, also
 used by Forge GameSheets. Forge's Page Rendering
-Profile ([in Forge](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_PAGE_RENDERING_PROFILE_1_2.md))
+Profile 1.3 ([specification](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_PAGE_RENDERING_PROFILE_1_3.md))
 specifies page geometry, fonts, accent
 titles, category weight, and overflow behavior. The
 renderer bundles Noto fonts under the SIL Open Font License; no CDN or document
@@ -55,11 +55,29 @@ upload is used.
 
 The renderer source for this pinned build is Forge's
 [`packages/fgs-renderer/`](https://github.com/natsteff/forge-gamesheets/tree/main/packages/fgs-renderer).
+This Studio update was synced against Forge source revision [`d29ac8e`](https://github.com/natsteff/forge-gamesheets/commit/d29ac8e).
 
 **Known prototype limits:** The Page Rendering Profile does not yet cover every
 Unicode script. FGSZ, general image sections,
 LiveSheets, browser autosave, and multi-page output are not implemented.
 These gaps should be closed or explicitly accepted before a general release.
+
+## Trackers and reusable paper (FGS 1.3)
+
+Both editors share controls, defaults and rendering for checkbox/numbered-box/
+segmented-bar/current-maximum trackers and ruled/square/dot/hex/music/tablature
+patterns, plus coordinate grids with axes and blank tic-tac-toe, Dots and Boxes
+and Sudoku boards. Boards can be single or repeated, retain their geometry and
+contain no generated puzzles or interactive gameplay. **New** defaults to Score
+sheet and offers full-page starters, including paired piano staves.
+One section generates all repeated marks. Use fixed height/count to combine
+patterns with other sections; **Fill remaining page** must be last and full width.
+Spacing is editable in millimeters/inches and saved in quarter-point increments.
+Print at **actual size (100%)**. Overflow is refused rather than clipped or shrunk.
+Starting values print as guidance; writable spaces remain blank. Studio has no
+LiveSheet backend. Forge provides host-controlled temporary shared tracker state.
+Health measurement logs, MusicXML import, musical notation and multipage output
+are not included. Screenshots may show the earlier published feature set.
 
 ## Run and test locally
 
@@ -100,6 +118,8 @@ Forge's [FGS 1.0 specification](https://github.com/natsteff/forge-gamesheets/blo
 and [FGS 1.1 additions](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_V1_1_SPECIFICATION.md)
 plus [FGS 1.2 additions](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_V1_2_SPECIFICATION.md)
 define the interchange format. FGS Studio has its own release schedule.
+The 1.3 contract is `docs/FGS_V1_3_SPECIFICATION.md` in Forge, with
+`docs/FGS_PAGE_RENDERING_PROFILE_1_3.md` and `docs/schemas/fgs-v1.3.schema.json`.
 When Forge changes the format, explicitly update this app's parser, editor,
 renderer, and shared fixtures. Update Forge's FGS Renderer package, rebuild,
 and run `node scripts/sync-renderer.mjs` in this repository and
