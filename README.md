@@ -1,7 +1,7 @@
 # FGS Studio
 
 FGS Studio is a browser-only proof of concept for creating, importing, editing,
-and exporting FGS 1.0/1.1 GameSheets. It is an independent application, not a copy
+and exporting FGS 1.0/1.1/1.2 GameSheets. It is an independent application, not a copy
 of Forge GameSheets. Its source and GitHub Pages site are public.
 
 FGS Studio is licensed under the [GNU Affero General Public License v3.0](LICENSE).
@@ -24,7 +24,7 @@ cannot set `frame-ancestors` or replace the host's TLS and header controls.
 
 ## First proof-of-concept scope
 
-- Create and edit FGS 1.0/1.1 headers, score tables, references, checklists, and
+- Create and edit FGS 1.0/1.1/1.2 headers, score tables, references, checklists, and
   lined notes in one- or two-block rows.
 - Add one portable header logo and an author footer. Studio converts PNG/JPEG
   input to a bounded PNG embedded in the FGS JSON; this preserves single-file
@@ -36,11 +36,18 @@ cannot set `frame-ancestors` or replace the host's TLS and header controls.
   current tab. A focused typing session counts as one step; opening another
   sheet clears the history.
 - Download `.fgs` and a single-page PDF locally in the browser.
+- FGS 1.2 Designer Notes are document-level editorial text (up to 4,000
+  characters), preserved in the exported FGS but never on the sheet or PDF.
+  They are readable by anyone with that file; do not include secrets.
+- Score tables expose **Score table title** and **First column heading**.
+  The latter defaults to **Category** for older files and can be customized in
+  1.2. Forge uses the same label in LiveSheets. Adding a 1.2 capability upgrades
+  the file version; adding a logo/footer afterward never downgrades it.
 
 The SVG preview and selectable-text PDF now use one point-based display list
 from a pinned [FGS Renderer](vendor/fgs-renderer/manifest.json) build, also
 used by Forge GameSheets. Forge's Page Rendering
-Profile ([in Forge](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_PAGE_RENDERING_PROFILE_1_1.md))
+Profile ([in Forge](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_PAGE_RENDERING_PROFILE_1_2.md))
 specifies page geometry, fonts, accent
 titles, category weight, and overflow behavior. The
 renderer bundles Noto fonts under the SIL Open Font License; no CDN or document
@@ -91,6 +98,7 @@ commit real game documents, credentials, or private materials.
 
 Forge's [FGS 1.0 specification](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_V1_SPECIFICATION.md)
 and [FGS 1.1 additions](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_V1_1_SPECIFICATION.md)
+plus [FGS 1.2 additions](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_V1_2_SPECIFICATION.md)
 define the interchange format. FGS Studio has its own release schedule.
 When Forge changes the format, explicitly update this app's parser, editor,
 renderer, and shared fixtures. Update Forge's FGS Renderer package, rebuild,

@@ -1,6 +1,6 @@
-import {addRow, fileStem, newBlock, newDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=11";
+import {addRow, fileStem, newBlock, newDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=12";
 import {createEditHistory} from "./history.js";
-import {loadPrintEngine, prepareHeaderLogo} from "../vendor/fgs-renderer/browser.mjs?profile=fgs-page-1.1&layout=2";
+import {loadPrintEngine, prepareHeaderLogo} from "../vendor/fgs-renderer/browser.mjs?profile=fgs-page-1.2&layout=2";
 
 let documentModel = newDocument();
 let selectedId = documentModel.rows[0].blocks[0].id;
@@ -87,7 +87,12 @@ function lines(value) { return value.split(/\r?\n/).map((part) => part.trim()).f
 function blockEditor(block, row, rowIndex, blockIndex) {
   const card = element("div", {className:"block-card"});
   const fields = element("div", {className:"block-fields"});
-  fields.append(field("Heading", block.title, (value) => {block.title=value;refreshSections();}, {max:160}));
+  fields.append(field(block.type === "score_table" ? "Score table title" : "Heading", block.title, (value) => {block.title=value;refreshSections();}, {max:160}));
+  if (block.type === "score_table") fields.append(field("First column heading", block.first_column_heading ?? "Category", (value) => {
+    const heading = value.trim() || "Category";
+    if (heading === "Category") delete block.first_column_heading;
+    else {documentModel.format_version="1.2";block.first_column_heading=heading;}
+  }, {max:80}));
   if (block.type === "header") {
     fields.append(field("Subtitle", block.subtitle, (value) => {block.subtitle=value;}, {max:240}));
     const upload = element("input");
@@ -106,7 +111,7 @@ function blockEditor(block, row, rowIndex, blockIndex) {
       try {
         const alt=fields.querySelector('input[maxlength="120"]').value.trim();
         const logo=await prepareHeaderLogo(upload.files[0],alt,!alt);
-        edit(()=>{documentModel.format_version="1.1";documentModel.rows.flatMap((row)=>row.blocks).forEach((item)=>{if(item.id!==block.id) delete item.logo;});block.logo=logo;});
+        edit(()=>{if(documentModel.format_version==="1.0") documentModel.format_version="1.1";documentModel.rows.flatMap((row)=>row.blocks).forEach((item)=>{if(item.id!==block.id) delete item.logo;});block.logo=logo;});
         refreshProperties();refreshPreview();
       } catch(error) {status(error.message,true);}
     });
@@ -202,6 +207,7 @@ function refresh() {
   byId("orientation").value = documentModel.page.orientation;
   byId("accent").value = documentModel.theme.accent;
   byId("footer").value = documentModel.footer || "";
+  byId("designer-notes").value = documentModel.designer_notes || "";
   historyButtons();
   refreshSections(); refreshProperties(); refreshPreview();
 }
@@ -219,8 +225,12 @@ byId("orientation").addEventListener("change", (event) => {edit(() => {documentM
 focusedEdit(byId("accent"), "input", (input) => {documentModel.theme.accent=input.value;});
 focusedEdit(byId("footer"), "change", (input) => {
   const footer = input.value.trim();
-  if (footer) {documentModel.format_version="1.1";documentModel.footer=footer;}
+  if (footer) {if(documentModel.format_version==="1.0") documentModel.format_version="1.1";documentModel.footer=footer;}
   else delete documentModel.footer;
+});
+focusedEdit(byId("designer-notes"), "input", (input) => {
+  if (input.value) {documentModel.format_version="1.2";documentModel.designer_notes=input.value;}
+  else delete documentModel.designer_notes;
 });
 byId("undo").addEventListener("click", () => restore(history.undo(snapshot())));
 byId("redo").addEventListener("click", () => restore(history.redo(snapshot())));

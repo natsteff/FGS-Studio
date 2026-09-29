@@ -1,4 +1,4 @@
-export const VERSION = "1.1";
+export const VERSION = "1.2";
 export const MAX_BYTES = 256 * 1024;
 const idPattern = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
 const extensionPattern = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/;
@@ -56,8 +56,8 @@ function block(value, path, seen, version) {
   object(value, path);
   if (!kinds.has(value.type)) fail(path, "unsupported block type");
   const common = ["id", "type", "title", "extensions"];
-  const fields = {header:["subtitle",...(version === "1.1" ? ["logo"] : [])],score_table:["players","score_rows","show_total","total_label"],reference:["items"],checklist:["items"],notes:["lines"]}[value.type];
-  keys(value, [...common, ...fields], ["id", "type", "title", ...fields.filter((field) => field !== "logo")], path);
+  const fields = {header:["subtitle",...(version !== "1.0" ? ["logo"] : [])],score_table:["players","score_rows","show_total","total_label",...(version === "1.2" ? ["first_column_heading"] : [])],reference:["items"],checklist:["items"],notes:["lines"]}[value.type];
+  keys(value, [...common, ...fields], ["id", "type", "title", ...fields.filter((field) => !["logo", "first_column_heading"].includes(field))], path);
   uniqueId(value.id, `${path}.id`, seen);
   string(value.title, `${path}.title`, value.type === "header" ? 0 : 1, 160);
   extensions(value.extensions, `${path}.extensions`);
@@ -66,6 +66,7 @@ function block(value, path, seen, version) {
     if (value.logo !== undefined) logo(value.logo, `${path}.logo`);
   }
   if (value.type === "score_table") {
+    if (value.first_column_heading !== undefined && (typeof value.first_column_heading !== "string" || !value.first_column_heading.trim() || [...value.first_column_heading].length > 80 || /[\u0000-\u001f\u007f]/.test(value.first_column_heading))) fail(path, "first_column_heading must be nonblank single-line text of at most 80 characters");
     list(value.players, `${path}.players`, 1, 12);
     value.players.forEach((item, index) => string(item, `${path}.players[${index}]`, 0, 40));
     list(value.score_rows, `${path}.score_rows`, 1, 30);
@@ -82,9 +83,10 @@ function block(value, path, seen, version) {
 
 export function validate(document) {
   const isCurrent = document?.format_version === VERSION;
-  keys(document, ["format", "format_version", "id", "title", "page", "theme", "rows", "extensions", ...(isCurrent ? ["footer"] : [])], ["format", "format_version", "id", "title", "page", "theme", "rows"], "FGS");
+  keys(document, ["format", "format_version", "id", "title", "page", "theme", "rows", "extensions", ...(["1.1", VERSION].includes(document?.format_version) ? ["footer"] : []), ...(isCurrent ? ["designer_notes"] : [])], ["format", "format_version", "id", "title", "page", "theme", "rows"], "FGS");
   if (document.format !== "forge-gamesheets") fail("FGS", "unknown format");
-  if (!["1.0", VERSION].includes(document.format_version)) fail("FGS", `only FGS 1.0 and ${VERSION} are supported`);
+  if (!["1.0", "1.1", VERSION].includes(document.format_version)) fail("FGS", `only FGS 1.0, 1.1 and ${VERSION} are supported`);
+  if (document.designer_notes !== undefined && (typeof document.designer_notes !== "string" || [...document.designer_notes].length > 4000 || /[\u0000-\u0008\u000b-\u001f\u007f]/.test(document.designer_notes))) fail("FGS.designer_notes", "must be plain text of at most 4000 characters");
   if (document.footer !== undefined && (typeof document.footer !== "string" || document.footer.length < 1 || document.footer.length > 160 || document.footer.split("\n").length > 2 || document.footer.split("\n").some((line) => !line.trim()) || /[\u0000-\u0009\u000b-\u001f\u007f]/.test(document.footer))) fail("FGS.footer", "must be one or two nonempty lines of at most 160 characters");
   const seen = new Set();
   uniqueId(document.id, "FGS.id", seen);

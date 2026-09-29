@@ -6,8 +6,8 @@
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
   <title>FGS Studio</title>
-  <link rel="stylesheet" href="styles.css?v=11">
-  <script type="module" src="src/editor.js?v=11"></script>
+  <link rel="stylesheet" href="styles.css?v=12">
+  <script type="module" src="src/editor.js?v=12"></script>
 </head>
 <body>
   <header class="topbar">
@@ -36,6 +36,10 @@
       <label>Optional credit (one or two lines)<textarea id="footer" rows="2" maxlength="160" placeholder="Created by …"></textarea></label>
       <hr>
       <p class="hint">A row may contain one full-width section or two side by side.</p>
+      <hr>
+      <h2>Designer Notes</h2>
+      <label>Notes for yourself or future editors<textarea id="designer-notes" rows="5" maxlength="4000"></textarea></label>
+      <p class="hint">Saved in the FGS file. Only shown in the Designer, never on the sheet, PDF, or LiveSheet. Do not include secrets.</p>
     </section>
     <section class="preview-area" aria-label="Page preview">
       <div class="preview-heading">
@@ -49,6 +53,6 @@
       <div id="preview" class="sheet-preview" aria-label="Printable sheet preview"></div>
     </section>
   </main>
-  <footer>FGS Studio proof of concept · FGS 1.0/1.1 · Browser-only editing</footer>
+  <footer>FGS Studio proof of concept · FGS 1.0/1.1/1.2 · Browser-only editing</footer>
 </body>
 </html>

@@ -100,7 +100,7 @@ function drawBlock(context, block, x, y, width, accent) {
       context.fillStyle = "#f1f0ec";
       context.fillRect(x, boundaries[index + 1], width, layout.rowHeights[index]);
     });
-    drawCell(context, ["Category"], x + 5, top, layout.labelWidth - 10, layout.headerHeight, {bold:true});
+    drawCell(context, [block.first_column_heading ?? "Category"], x + 5, top, layout.labelWidth - 10, layout.headerHeight, {bold:true});
     layout.playerLines.forEach((lines, index) => drawCell(context, lines, x + layout.labelWidth + (index + .5) * layout.columnWidth, top, layout.columnWidth - 8, layout.headerHeight, {size:8,bold:true,center:true}));
     layout.labelLines.forEach((lines, index) => drawCell(context, lines, x + 5, boundaries[index + 1], layout.labelWidth - 10, layout.rowHeights[index], {bold:calculated(layout.labels[index]),marker:calculated(layout.labels[index])}));
     context.strokeStyle = "#333"; context.lineWidth = .5;

@@ -21,7 +21,10 @@ test("editor and its format module use the current cache key", () => {
   assert.match(html, /<h2>Footer<\/h2>/);
   assert.match(editor, /button\("Choose logo"/);
   assert.match(editor, /upload\.hidden=true/);
-  assert.match(styles, /#footer\{display:block;width:100%/);
+  assert.match(styles, /#footer,#designer-notes\{display:block;width:100%/);
+  assert.match(html, /<h2>Designer Notes<\/h2>/);
+  assert.match(editor, /"Score table title"/);
+  assert.match(editor, /field\("First column heading"/);
 });
 
 test("a new FGS 1.0 document validates and survives JSON export/import", () => {
@@ -61,14 +64,38 @@ test("FGS 1.1 footer and one bounded header logo survive import", () => {
 });
 test("unknown versions, properties and block types are rejected", () => {
   const sheet = newDocument();
-  sheet.format_version = "1.2";
-  assert.throws(() => validate(sheet), /only FGS 1.0 and 1.1/);
+  sheet.format_version = "1.3";
+  assert.throws(() => validate(sheet), /only FGS 1.0, 1.1 and 1.2/);
   sheet.format_version = "1.1";
   sheet.unknown = true;
   assert.throws(() => validate(sheet), /unknown property/);
   delete sheet.unknown;
   sheet.rows[0].blocks[0].type = "script";
   assert.throws(() => validate(sheet), /unsupported block type/);
+});
+
+test("FGS 1.2 preserves editorial notes and optional first-column heading",()=>{
+  const sheet=newDocument();
+  sheet.format_version="1.2";
+  sheet.designer_notes="  Editorial-only marker\n\tKeep whitespace  ";
+  sheet.rows[1].blocks[0].first_column_heading="Round";
+  sheet.footer="Created by Example";
+  assert.deepEqual(parse(JSON.stringify(sheet)),sheet);
+  for(const version of ["1.0","1.1"]) {
+    const old=structuredClone(sheet);old.format_version=version;
+    delete old.footer;
+    assert.throws(()=>validate(old),/unknown property designer_notes/);
+    delete old.designer_notes;
+    assert.throws(()=>validate(old),/unknown property first_column_heading/);
+  }
+  for(const value of [null,123,"x".repeat(4001),"bad\u0000text","bad\rtext","bad\u007ftext"]) {
+    const bad=structuredClone(sheet);bad.designer_notes=value;
+    assert.throws(()=>validate(bad),/designer_notes/);
+  }
+  for(const value of [null,123,""," ","x".repeat(81),"bad\ntext","bad\ttext","bad\u007ftext"]) {
+    const bad=structuredClone(sheet);bad.rows[1].blocks[0].first_column_heading=value;
+    assert.throws(()=>validate(bad),/first_column_heading/);
+  }
 });
 test("duplicate IDs and invalid dimensions are rejected", () => {
   const sheet = newDocument();
@@ -126,7 +153,7 @@ test("active Studio preview and PDF share one layout with bold category labels",
   const sheet = parse(readFileSync(new URL("./fixtures/dense-score-sheet.fgs", import.meta.url), "utf8"));
   const layout = engine.layout(sheet);
   assert.equal(layout.profile, PROFILE.id);
-  assert.equal(layout.profile, "fgs-page-1.1");
+  assert.equal(layout.profile, "fgs-page-1.2");
   assert.equal(layout.fits, true);
   assert.equal(layout.commands.find((command) => command.value === "Triple Yahtzee").color, sheet.theme.accent);
   assert.equal(layout.commands.find((command) => command.value === "Upper Section").color, sheet.theme.accent);
@@ -134,6 +161,13 @@ test("active Studio preview and PDF share one layout with bold category labels",
   assert.match(engine.toSvg(layout), /font-family="FGS bold"[^>]*>Ones, Count\/Add Ones<\/text>/);
   const pdf = await engine.toPdf(layout, sheet.title);
   assert.equal(new TextDecoder("latin1").decode(pdf.slice(0, 8)), "%PDF-1.7");
+  sheet.format_version="1.2";
+  sheet.designer_notes="Editorial-only marker";
+  assert.deepEqual(engine.layout(sheet).commands,layout.commands);
+  assert.deepEqual(await engine.toPdf(engine.layout(sheet),sheet.title),pdf);
+  sheet.rows[1].blocks[0].first_column_heading="Action";
+  assert.match(engine.toSvg(engine.layout(sheet)),/>Action<\/text>/);
+  assert.doesNotMatch(engine.toSvg(engine.layout(sheet)),/Editorial-only marker/);
 
   sheet.page.orientation = "landscape";
   const landscape = engine.layout(sheet);

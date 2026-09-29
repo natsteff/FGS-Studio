@@ -20,7 +20,7 @@ function previewBlock(block) {
       const marker = kind ? '<small class="preview-calculated">Calculated</small>' : "";
       return `<tr class="${kind || "score"}"><th>${escape(label)}${marker}</th>${block.players.map(() => "<td></td>").join("")}</tr>`;
     }).join("");
-    return `<section><h3>${escape(block.title)}</h3><table><thead><tr><th>Category</th>${heads}</tr></thead><tbody>${rows}</tbody></table></section>`;
+    return `<section><h3>${escape(block.title)}</h3><table><thead><tr><th>${escape(block.first_column_heading ?? "Category")}</th>${heads}</tr></thead><tbody>${rows}</tbody></table></section>`;
   }
   if (block.type === "notes") return `<section><h3>${escape(block.title)}</h3><div class="preview-note-lines">${Array.from({length: block.lines}, () => "<i></i>").join("")}</div></section>`;
   const items = block.items.map((item) => block.type === "checklist" ? `<li>□ ${escape(item)}</li>` : `<li>${escape(item)}</li>`).join("");
