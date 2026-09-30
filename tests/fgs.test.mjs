@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
-import {addRow, fgsFileName, newDocument, parse, validate} from "../src/fgs.js";
+import {addRow, fgsFileName, pdfFileName, newDocument, parse, validate} from "../src/fgs.js";
 import {render} from "../src/render.js";
 import {previewHtml} from "../src/forge-preview.js";
 import {createPrintEngine, PROFILE} from "../vendor/fgs-renderer/browser.mjs";
@@ -17,6 +17,15 @@ test("FGS downloads use the readable sheet title as the filename", () => {
   assert.equal(fgsFileName("  ...  "), "Game Sheet.fgs");
   const editor = readFileSync(new URL("../src/editor.js", import.meta.url), "utf8");
   assert.match(editor, /fgsFileName\(documentModel\.title\)/);
+});
+test("both PDF downloads use the readable sheet title", () => {
+  assert.equal(pdfFileName("Phase 10 Player Card"), "Phase 10 Player Card.pdf");
+  assert.equal(pdfFileName("Phase 10 Player Card", true), "Phase 10 Player Card - print sheet.pdf");
+  assert.equal(pdfFileName("Café / Notes"), "Café - Notes.pdf");
+  assert.equal(pdfFileName("  ...  "), "Game Sheet.pdf");
+  const editor = readFileSync(new URL("../src/editor.js", import.meta.url), "utf8");
+  assert.match(editor, /pdfFileName\(documentModel\.title\)/);
+  assert.match(editor, /pdfFileName\(documentModel\.title,true\)/);
 });
 test("editor and its format module use the current cache key", () => {
   const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");

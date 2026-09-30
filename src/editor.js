@@ -1,4 +1,4 @@
-import {addRow, fgsFileName, fileStem, newBlock, newDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=20";
+import {addRow, fgsFileName, pdfFileName, newBlock, newDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=21";
 import {createEditHistory} from "./history.js";
 import {canMoveSectionTo, moveSectionTo, sectionNeighbor} from "./sheet-order.mjs";
 import {lineSelection, previewTargetAt} from "./preview-navigation.mjs";
@@ -406,7 +406,7 @@ byId("export-pdf").addEventListener("click", async () => {
     const layout = engine.layout(documentModel,printSizeSelection());
     if(!layout.fits)throw new Error(layout.reason || `“${layout.overflow}” does not fit at the selected print size.`);
     const pdf = await engine.toPdf(layout, documentModel.title);
-    download(new Blob([pdf], {type:"application/pdf"}), `${fileStem(documentModel.title)}.pdf`);
+    download(new Blob([pdf], {type:"application/pdf"}), pdfFileName(documentModel.title));
     status("PDF downloaded.");
   } catch (error) {status(error.message, true);}
 });
@@ -434,7 +434,7 @@ byId("print-sheet-form").addEventListener("submit",async(event)=>{
     const layout=engine.layout(documentModel,printSizeSelection());
     if(!layout.fits)throw new Error(layout.reason || `“${layout.overflow}” does not fit at the selected print size.`);
     const pdf=await engine.toPrintSheetPdf(layout,documentModel.title,printSheetOptions());
-    download(new Blob([pdf],{type:"application/pdf"}),`${fileStem(documentModel.title)}-print-sheet.pdf`);
+    download(new Blob([pdf],{type:"application/pdf"}),pdfFileName(documentModel.title,true));
     byId("print-sheet-dialog").close();
     status("Print-sheet PDF downloaded.");
   }catch(error){status(error.message,true);}
