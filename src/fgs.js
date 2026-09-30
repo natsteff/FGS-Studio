@@ -92,7 +92,7 @@ export function validate(document) {
   if (document.format !== "forge-gamesheets") fail("FGS", "unknown format");
   if (!["1.0", "1.1","1.2", VERSION].includes(document.format_version)) fail("FGS", `only FGS 1.0–${VERSION} are supported`);
   if (document.designer_notes !== undefined && (typeof document.designer_notes !== "string" || [...document.designer_notes].length > 4000 || /[\u0000-\u0008\u000b-\u001f\u007f]/.test(document.designer_notes))) fail("FGS.designer_notes", "must be plain text of at most 4000 characters");
-  if (document.footer !== undefined && (typeof document.footer !== "string" || document.footer.length < 1 || document.footer.length > 160 || document.footer.split("\n").length > 2 || document.footer.split("\n").some((line) => !line.trim()) || /[\u0000-\u0009\u000b-\u001f\u007f]/.test(document.footer))) fail("FGS.footer", "must be one or two nonempty lines of at most 160 characters");
+  if (document.footer !== undefined && (typeof document.footer !== "string" || document.footer.length < 1 || document.footer.length > 4000 || document.footer.split("\n").length > 2 || document.footer.split("\n").some((line) => !line.trim()) || /[\u0000-\u0009\u000b-\u001f\u007f]/.test(document.footer))) fail("FGS.footer", "must be one or two nonempty lines (up to 4,000 characters for import safety)");
   const seen = new Set();
   uniqueId(document.id, "FGS.id", seen);
   string(document.title, "FGS.title", 1, 160);

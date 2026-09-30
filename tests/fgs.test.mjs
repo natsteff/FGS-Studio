@@ -69,6 +69,18 @@ test("FGS 1.1 footer and one bounded header logo survive import", () => {
   sheet.footer="one\ntwo\nthree";
   assert.throws(()=>validate(sheet),/one or two/);
 });
+test("footer preserves two long entered lines without an input character cutoff",()=>{
+  const sheet=newDocument();
+  sheet.format_version="1.1";
+  sheet.footer="Biggest Win = largest VP margin. Add an entry whenever a new record is set; keep earlier entries as history.\nCustomize this sheet (with source FGS file) at https://natsteff.github.io/FGS-Studio/";
+  assert.ok(sheet.footer.length>160);
+  validate(sheet);
+  assert.equal(parse(JSON.stringify(sheet)).footer,sheet.footer);
+  sheet.footer="x".repeat(4001);
+  assert.throws(()=>validate(sheet),/4,000/);
+  const html=readFileSync(new URL("../index.html",import.meta.url),"utf8");
+  assert.match(html,/<textarea id="footer" rows="2" placeholder=/);
+});
 test("unknown versions, properties and block types are rejected", () => {
   const sheet = newDocument();
   sheet.format_version = "1.4";

@@ -57,7 +57,7 @@ The renderer source for this pinned build is Forge's
 [`packages/fgs-renderer/`](https://github.com/natsteff/forge-gamesheets/tree/main/packages/fgs-renderer).
 The last published Studio baseline was synced against Forge source revision
 [`d29ac8e`](https://github.com/natsteff/forge-gamesheets/commit/d29ac8e). This
-unpublished local trial pins the renderer from Forge commit `da3174d`. It must
+unpublished local trial pins the renderer from Forge commit `559861f`. It must
 not be described as a published revision until both repositories are pushed.
 
 **Known prototype limits:** The Page Rendering Profile does not yet cover every
