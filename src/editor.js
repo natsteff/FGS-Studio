@@ -1,5 +1,6 @@
-import {addRow, fgsFileName, fileStem, newBlock, newDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=18";
+import {addRow, fgsFileName, fileStem, newBlock, newDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=19";
 import {createEditHistory} from "./history.js";
+import {canMoveSectionTo, moveSectionTo, sectionNeighbor} from "./sheet-order.mjs";
 import {loadPrintEngine, prepareHeaderLogo,contentControls,validateFill,applyPaperTemplate} from "../vendor/fgs-renderer/browser.mjs?profile=fgs-page-1.3&layout=8";
 
 let documentModel = newDocument();
@@ -175,16 +176,49 @@ function blockEditor(block, row, rowIndex, blockIndex) {
 function refreshSections() {
   sectionRoot.replaceChildren();
   documentModel.rows.forEach((row, index) => {
+    const group=element("div",{className:"structure-row"});
+    const toolbar=element("div",{className:"structure-row-toolbar"});
+    toolbar.append(element("span",{text:`Row ${index+1} · ${row.blocks.length===2?"left and right":"full width"}`}));
+    const rowActions=element("span",{className:"structure-row-actions"});
+    for(const [label,offset] of [["up",-1],["down",1]]){
+      const control=button(offset<0?"↑":"↓",()=>edit(()=>{
+        documentModel.rows.splice(index+offset,0,documentModel.rows.splice(index,1)[0]);
+        refresh();
+      }),"secondary");
+      control.setAttribute("aria-label",`Move entire row ${index+1} ${label}`);
+      control.disabled=index+offset<0||index+offset>=documentModel.rows.length;
+      rowActions.append(control);
+    }
+    toolbar.append(rowActions);group.append(toolbar);
     row.blocks.forEach((block) => {
       const item = element("div", {className:`structure-item${selectedId === block.id ? " is-selected" : ""}`});
+      item.draggable=true;
+      item.addEventListener("dragstart",event=>event.dataTransfer.setData("text/plain",block.id));
+      item.addEventListener("dragover",event=>event.preventDefault());
+      item.addEventListener("drop",event=>{
+        event.preventDefault();
+        const fromId=event.dataTransfer.getData("text/plain");
+        if(fromId===block.id)return;
+        if(!canMoveSectionTo(documentModel,fromId,block.id)){
+          status("Sections cannot cross a full-width row. Use the row arrows to move the whole row.",true);
+          return;
+        }
+        edit(()=>{moveSectionTo(documentModel,fromId,block.id);refresh();});
+      });
       const select = button(`⠿  ${block.title || block.type.replace("_", " ")}`, () => {selectedId=block.id;refreshSections();refreshProperties();}, "section-select");
       select.setAttribute("aria-pressed", selectedId === block.id);
       item.append(select);
       const actions = element("div", {className:"mini-actions"});
-      if (index > 0) actions.append(button("↑", () => edit(() => { [documentModel.rows[index-1],documentModel.rows[index]]=[documentModel.rows[index],documentModel.rows[index-1]];refresh(); }), "secondary"));
-      if (index < documentModel.rows.length - 1) actions.append(button("↓", () => edit(() => { [documentModel.rows[index+1],documentModel.rows[index]]=[documentModel.rows[index],documentModel.rows[index+1]];refresh(); }), "secondary"));
-      item.append(actions);sectionRoot.append(item);
+      for(const [symbol,direction] of [["↑",-1],["↓",1]]){
+        const neighbor=sectionNeighbor(documentModel,block.id,direction);
+        const control=button(symbol,()=>edit(()=>{moveSectionTo(documentModel,block.id,neighbor.block.id);refresh();}),"secondary");
+        control.setAttribute("aria-label",`Move ${block.title||block.type.replace("_"," ")} ${direction<0?"before":"after"} ${neighbor?.block.title||"adjacent section"}`);
+        control.disabled=!neighbor||neighbor.blocked;
+        actions.append(control);
+      }
+      item.append(actions);group.append(item);
     });
+    sectionRoot.append(group);
   });
 }
 function refreshProperties() {

@@ -6,8 +6,8 @@
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
   <title>FGS Studio</title>
-  <link rel="stylesheet" href="styles.css?v=17">
-  <script type="module" src="src/editor.js?v=18"></script>
+  <link rel="stylesheet" href="styles.css?v=18">
+  <script type="module" src="src/editor.js?v=19"></script>
 </head>
 <body>
   <header class="topbar">
@@ -26,7 +26,7 @@
   <main class="workspace">
     <section class="controls" aria-label="Editor">
       <h2>Sheet structure</h2>
-      <p class="hint">Select a section to edit. Use the arrows to reorder rows.</p>
+      <p class="hint">Sections read left to right, then top to bottom. Section arrows move one section; row arrows move the whole row. A section cannot cross a full-width row without moving that row.</p>
       <div id="sections" class="sections"></div>
       <div class="section-heading"><label for="block-type">Section type</label><div><select id="block-type"><option value="score_table">Score table</option><option value="header">Header</option><option value="reference">Reference</option><option value="checklist">Checklist</option><option value="notes">Notes</option><option value="tracker">Tracker</option><option value="paper_pattern">Paper pattern</option></select><button id="add" type="button">+ Add section</button></div></div>
       <hr>

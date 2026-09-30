@@ -15,6 +15,12 @@ body{background:#fdfaf6}
 .structure-item .section-select{flex:1;min-width:0;justify-content:flex-start;text-align:left;overflow-wrap:anywhere;padding:.72rem .8rem;color:#252320;background:transparent;border:0;border-radius:0}
 .structure-item .mini-actions{gap:0}
 .structure-item .mini-actions button{border:0;border-left:1px solid #e5d9ce;border-radius:0;background:transparent}
+.structure-row{border:1px solid #e5d9ce;border-radius:.7rem;padding:.4rem}
+.structure-row-toolbar{display:flex;justify-content:space-between;align-items:center;gap:.4rem;margin:0 .35rem .4rem;color:#68635c;font-size:.75rem;font-weight:700}
+.structure-row-actions{display:flex;gap:.2rem}
+.structure-row-actions button{padding:.15rem .4rem;font-size:.8rem}
+.structure-row button:disabled{opacity:.35;cursor:default}
+.structure-row .structure-item+.structure-item{margin-top:.4rem}
 .section-heading{display:block;margin-top:1.1rem;font-weight:700;font-size:.85rem}
 .section-heading>div{display:flex;margin-top:.4rem;gap:.5rem}
 .section-heading select{max-width:none;flex:1}
