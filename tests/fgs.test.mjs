@@ -194,3 +194,26 @@ test("active Studio preview and PDF share one layout with bold category labels",
   assert.equal(landscape.overflow, "Section Totals");
   await assert.rejects(engine.toPdf(landscape, sheet.title), /does not fit/);
 });
+
+test("pinned renderer lets short headings make narrow paired columns",()=>{
+  const root=new URL("../vendor/fgs-renderer/fonts/",import.meta.url);
+  const fonts={
+    sans:new Uint8Array(readFileSync(new URL("NotoSans-Regular.ttf",root))),
+    bold:new Uint8Array(readFileSync(new URL("NotoSans-Bold.ttf",root))),
+    serif:new Uint8Array(readFileSync(new URL("NotoSerif-Bold.ttf",root))),
+  };
+  const engine=createPrintEngine(fonts);
+  const sheet=newDocument();
+  sheet.format_version="1.2";
+  const block={id:"paired-one",type:"score_table",title:"Biggest Win",first_column_heading:"Record",players:["Player Name (Date)","Margin","Score"],score_rows:["1","2"],show_total:false,total_label:"Total"};
+  sheet.rows=[{id:"pair",blocks:[block,{...block,id:"paired-two"}]}];
+  const layout=engine.layout(sheet);
+  assert.equal(layout.fits,true);
+  const bound=layout.blockBounds[0];
+  const top=bound.y+PROFILE.tableTitleHeight;
+  const edges=layout.commands.filter(command=>command.type==="line"&&command.x1===command.x2&&command.y1===top&&command.x1>=bound.x&&command.x1<=bound.x+bound.width+.001).map(command=>command.x1).sort((a,b)=>a-b);
+  const widths=edges.slice(1).map((edge,index)=>edge-edges[index]);
+  assert.equal(widths.length,4);
+  assert.ok(widths[1]>widths[3]*2);
+  assert.ok(widths[3]<54);
+});

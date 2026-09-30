@@ -1,6 +1,6 @@
-import {addRow, fgsFileName, fileStem, newBlock, newDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=17";
+import {addRow, fgsFileName, fileStem, newBlock, newDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=18";
 import {createEditHistory} from "./history.js";
-import {loadPrintEngine, prepareHeaderLogo,contentControls,validateFill,applyPaperTemplate} from "../vendor/fgs-renderer/browser.mjs?profile=fgs-page-1.3&layout=7";
+import {loadPrintEngine, prepareHeaderLogo,contentControls,validateFill,applyPaperTemplate} from "../vendor/fgs-renderer/browser.mjs?profile=fgs-page-1.3&layout=8";
 
 let documentModel = newDocument();
 let selectedId = documentModel.rows[0].blocks[0].id;
