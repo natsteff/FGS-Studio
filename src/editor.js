@@ -10,6 +10,7 @@ const sectionRoot = byId("sections");
 const printEngine = loadPrintEngine(new URL("../vendor/fgs-renderer/", import.meta.url));
 let previewRevision = 0;
 let printPlanRevision = 0;
+let copiesManuallyEdited = false;
 function printSizeSelection() {
   const selection={preset:byId("print-size").value};
   if(selection.preset==="custom")Object.assign(selection,{width:byId("custom-width").value,height:byId("custom-height").value,unit:byId("custom-unit").value});
@@ -21,7 +22,10 @@ async function updatePrintPlan(){
   const revision=++printPlanRevision;
   const eligible=byId("print-size").value==="half"&&byId("print-paper").value===documentModel.page.size;
   byId("borderless").disabled=!eligible;
-  if(!eligible)byId("borderless").checked=false;
+  if(!eligible && byId("borderless").checked){
+    byId("borderless").checked=false;
+    if(!copiesManuallyEdited)byId("print-copies").value="1";
+  }
   try {
     const engine=await printEngine;
     const layout=engine.layout(documentModel,printSizeSelection());
@@ -41,8 +45,10 @@ function updatePrintControls(){
   if(compact)pdf.parentElement.insertBefore(printSheet,pdf);
   else pdf.parentElement.insertBefore(pdf,printSheet);
   byId("custom-size").hidden=preset!=="custom";
+  byId("print-note-full").hidden=compact;
+  byId("print-note-compact").hidden=!compact;
+  printSheet.hidden=!compact;
   printSheet.disabled=!compact;
-  printSheet.title=compact?"":"Full Page already occupies the printer sheet; use Download PDF.";
   refreshPreview();
 }
 function resetPrintSize(){byId("print-size").value="full";updatePrintControls();}
@@ -333,12 +339,19 @@ byId("export-pdf").addEventListener("click", async () => {
 });
 byId("export-print-sheet").addEventListener("click",()=>{
   byId("print-paper").value=documentModel.page.size;
+  byId("print-copies").value="1";
+  copiesManuallyEdited=false;
   byId("borderless").checked=false;
   byId("print-sheet-dialog").showModal();
   updatePrintPlan();
 });
-for(const id of ["print-paper","print-copies","cut-guides","borderless"])byId(id).addEventListener("change",updatePrintPlan);
-byId("print-copies").addEventListener("input",updatePrintPlan);
+for(const id of ["print-paper","cut-guides"])byId(id).addEventListener("change",updatePrintPlan);
+byId("print-copies").addEventListener("input",()=>{copiesManuallyEdited=true;updatePrintPlan();});
+byId("print-copies").addEventListener("change",()=>{copiesManuallyEdited=true;updatePrintPlan();});
+byId("borderless").addEventListener("change",()=>{
+  if(!copiesManuallyEdited)byId("print-copies").value=byId("borderless").checked?"2":"1";
+  updatePrintPlan();
+});
 byId("cancel-print-sheet").addEventListener("click",()=>byId("print-sheet-dialog").close());
 byId("print-sheet-form").addEventListener("submit",async(event)=>{
   event.preventDefault();
