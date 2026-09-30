@@ -204,3 +204,4 @@ export function addRow(document, type) {
   if(["tracker","paper_pattern"].includes(type))document.format_version="1.3";
 }
 export function fileStem(title) { return title.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "game-sheet"; }
+export function fgsFileName(title) { const stem=title.replace(/[<>:"/\\|?*\x00-\x1f\x7f]/g,"-").trim().replace(/[. ]+$/,""); return `${stem || "Game Sheet"}.fgs`; }

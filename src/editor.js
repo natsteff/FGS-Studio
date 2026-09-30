@@ -1,4 +1,4 @@
-import {addRow, fileStem, newBlock, newDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=15";
+import {addRow, fgsFileName, fileStem, newBlock, newDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=16";
 import {createEditHistory} from "./history.js";
 import {loadPrintEngine, prepareHeaderLogo,contentControls,validateFill,applyPaperTemplate} from "../vendor/fgs-renderer/browser.mjs?profile=fgs-page-1.3&layout=6";
 
@@ -322,7 +322,7 @@ byId("import").addEventListener("change", async (event) => {
 byId("export-fgs").addEventListener("click", () => {
   try {
     validate(documentModel);
-    download(new Blob([JSON.stringify(documentModel,null,2)+"\n"],{type:"application/vnd.forge-gamesheets+json"}), `${fileStem(documentModel.title)}.fgs`);
+    download(new Blob([JSON.stringify(documentModel,null,2)+"\n"],{type:"application/vnd.forge-gamesheets+json"}), fgsFileName(documentModel.title));
     status("FGS downloaded. Keep this file to edit the sheet later.");
   } catch (error) {status(error.message, true);}
 });

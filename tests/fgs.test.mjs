@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
-import {addRow, newDocument, parse, validate} from "../src/fgs.js";
+import {addRow, fgsFileName, newDocument, parse, validate} from "../src/fgs.js";
 import {render} from "../src/render.js";
 import {previewHtml} from "../src/forge-preview.js";
 import {createPrintEngine, PROFILE} from "../vendor/fgs-renderer/browser.mjs";
@@ -10,6 +10,13 @@ test("accent picker sits with page controls", () => {
   const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
   assert.ok(html.indexOf('id="orientation"') < html.indexOf('id="accent"'));
   assert.ok(html.indexOf('id="accent"') < html.indexOf('id="undo"'));
+});
+test("FGS downloads use the readable sheet title as the filename", () => {
+  assert.equal(fgsFileName("Phase 10 Player Card"), "Phase 10 Player Card.fgs");
+  assert.equal(fgsFileName("Café / Notes"), "Café - Notes.fgs");
+  assert.equal(fgsFileName("  ...  "), "Game Sheet.fgs");
+  const editor = readFileSync(new URL("../src/editor.js", import.meta.url), "utf8");
+  assert.match(editor, /fgsFileName\(documentModel\.title\)/);
 });
 test("editor and its format module use the current cache key", () => {
   const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
