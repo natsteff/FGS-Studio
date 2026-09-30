@@ -172,7 +172,7 @@ test("active Studio preview and PDF share one layout with bold category labels",
   const sheet = parse(readFileSync(new URL("./fixtures/dense-score-sheet.fgs", import.meta.url), "utf8"));
   const layout = engine.layout(sheet);
   assert.equal(layout.profile, PROFILE.id);
-  assert.equal(layout.profile, "fgs-page-1.3");
+  assert.equal(layout.profile, "fgs-page-1.3.1");
   assert.equal(layout.fits, true);
   assert.equal(layout.commands.find((command) => command.value === "Triple Yahtzee").color, sheet.theme.accent);
   assert.equal(layout.commands.find((command) => command.value === "Upper Section").color, sheet.theme.accent);

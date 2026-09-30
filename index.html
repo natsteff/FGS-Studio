@@ -6,8 +6,8 @@
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
   <title>FGS Studio</title>
-  <link rel="stylesheet" href="styles.css?v=18">
-  <script type="module" src="src/editor.js?v=19"></script>
+  <link rel="stylesheet" href="styles.css?v=19">
+  <script type="module" src="src/editor.js?v=20"></script>
 </head>
 <body>
   <header class="topbar">
@@ -55,6 +55,7 @@
       </div>
       <p class="print-note">Choose the finished size before composing this sheet. <span id="print-note-full">For Full Page, use Download PDF.</span><span id="print-note-compact" hidden>For ordinary Letter/A4 printers, use Create print sheet; direct Download PDF makes one finished-size page without cut guides. Custom Width and Height set its orientation directly.</span> Finished size is not saved in .fgs during this trial; note the intended size in Designer Notes and reselect it after reopening.</p>
       <p id="fit" class="fit-info" aria-live="polite"></p>
+      <p class="hint">Click a heading, table label, or list item on the preview to edit its source field.</p>
       <div id="preview" class="sheet-preview" aria-label="Printable sheet preview"></div>
     </section>
   </main>

@@ -1,7 +1,8 @@
-import {addRow, fgsFileName, fileStem, newBlock, newDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=19";
+import {addRow, fgsFileName, fileStem, newBlock, newDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=20";
 import {createEditHistory} from "./history.js";
 import {canMoveSectionTo, moveSectionTo, sectionNeighbor} from "./sheet-order.mjs";
-import {loadPrintEngine, prepareHeaderLogo,contentControls,validateFill,applyPaperTemplate} from "../vendor/fgs-renderer/browser.mjs?profile=fgs-page-1.3&layout=8";
+import {lineSelection, previewTargetAt} from "./preview-navigation.mjs";
+import {loadPrintEngine, prepareHeaderLogo,contentControls,validateFill,applyPaperTemplate} from "../vendor/fgs-renderer/browser.mjs?profile=fgs-page-1.3.1&layout=9";
 
 let documentModel = newDocument();
 let selectedId = documentModel.rows[0].blocks[0].id;
@@ -10,6 +11,7 @@ const preview = byId("preview");
 const sectionRoot = byId("sections");
 const printEngine = loadPrintEngine(new URL("../vendor/fgs-renderer/", import.meta.url));
 let previewRevision = 0;
+let latestPreviewLayout = null;
 let printPlanRevision = 0;
 let copiesManuallyEdited = false;
 function printSizeSelection() {
@@ -111,6 +113,7 @@ function field(label, value, update, options = {}) {
   const wrapper = element("label", {text:label});
   const input = element(options.multiline ? "textarea" : "input");
   if (options.type) input.type = options.type;
+  if (options.key) input.dataset.previewField=options.key;
   if (options.max) input.maxLength = options.max;
   if (options.min !== undefined) input.min = options.min;
   if (options.high !== undefined) input.max = options.high;
@@ -131,14 +134,14 @@ function lines(value) { return value.split(/\r?\n/).map((part) => part.trim()).f
 function blockEditor(block, row, rowIndex, blockIndex) {
   const card = element("div", {className:"block-card"});
   const fields = element("div", {className:"block-fields"});
-  fields.append(field(block.type === "score_table" ? "Score table title" : "Heading", block.title, (value) => {block.title=value;refreshSections();}, {max:160}));
+  fields.append(field(block.type === "score_table" ? "Score table title" : "Heading", block.title, (value) => {block.title=value;refreshSections();}, {max:160,key:"title"}));
   if (block.type === "score_table") fields.append(field("First column heading", block.first_column_heading ?? "Category", (value) => {
     const heading = value.trim() || "Category";
     if (heading === "Category") delete block.first_column_heading;
     else {if(documentModel.format_version!=="1.3")documentModel.format_version="1.2";block.first_column_heading=heading;}
-  }, {max:80}));
+  }, {max:80,key:"first_column_heading"}));
   if (block.type === "header") {
-    fields.append(field("Subtitle", block.subtitle, (value) => {block.subtitle=value;}, {max:240}));
+    fields.append(field("Subtitle", block.subtitle, (value) => {block.subtitle=value;}, {max:240,key:"subtitle"}));
     const upload = element("input");
     upload.type="file";upload.accept="image/png,image/jpeg";upload.hidden=true;
     const uploadControl=element("div",{className:"logo-upload"});
@@ -162,13 +165,13 @@ function blockEditor(block, row, rowIndex, blockIndex) {
     if (block.logo) fields.append(button("Remove logo",()=>{edit(()=>{delete block.logo;});refreshProperties();refreshPreview();}));
   }
   if (block.type === "score_table") {
-    fields.append(field("Players — one per line (1–12)", block.players.join("\n"), (value) => {block.players=lines(value);}, {multiline:true}));
-    fields.append(field("Score rows — one per line (1–30)", block.score_rows.join("\n"), (value) => {block.score_rows=lines(value);}, {multiline:true}));
+    fields.append(field("Players — one per line (1–12)", block.players.join("\n"), (value) => {block.players=lines(value);}, {multiline:true,key:"players"}));
+    fields.append(field("Score rows — one per line (1–30)", block.score_rows.join("\n"), (value) => {block.score_rows=lines(value);}, {multiline:true,key:"score_rows"}));
     fields.append(check("Include legacy summary row", block.show_total, (value) => {block.show_total=value;refreshProperties();}));
-    if (block.show_total) fields.append(field("Summary label", block.total_label, (value) => {block.total_label=value;}, {max:80}));
+    if (block.show_total) fields.append(field("Summary label", block.total_label, (value) => {block.total_label=value;}, {max:80,key:"total_label"}));
   }
-  if (block.type === "reference" || block.type === "checklist") fields.append(field("Items — one per line (1–30)", block.items.join("\n"), (value) => {block.items=lines(value);}, {multiline:true}));
-  if (block.type === "notes") fields.append(field("Writing lines (1–20)", block.lines, (value) => {block.lines=Number(value);}, {type:"number",min:1,high:20}));
+  if (block.type === "reference" || block.type === "checklist") fields.append(field("Items — one per line (1–30)", block.items.join("\n"), (value) => {block.items=lines(value);}, {multiline:true,key:"items"}));
+  if (block.type === "notes") fields.append(field("Writing lines (1–20)", block.lines, (value) => {block.lines=Number(value);}, {type:"number",min:1,high:20,key:"lines"}));
   if(["tracker","paper_pattern"].includes(block.type))fields.append(contentControls(block,{canFill:row.blocks.length===1&&rowIndex===documentModel.rows.length-1,change:next=>edit(()=>{row.blocks[row.blocks.indexOf(block)]=next;refresh();}),onError:error=>status(error,true)}));
   card.append(fields);
   return card;
@@ -275,6 +278,7 @@ async function refreshPreview() {
     const engine = await printEngine;
     const layout = engine.layout(documentModel,printSizeSelection());
     if (revision !== previewRevision) return;
+    latestPreviewLayout=layout.fits?layout:null;
     preview.innerHTML = engine.toSvg(layout);
     preview.style.width=layout.fitScale===undefined?"":`${Math.round(layout.width*96/72)}px`;
     if(layout.fits&&layout.fitScale!==undefined){
@@ -285,10 +289,45 @@ async function refreshPreview() {
     status("");
   } catch (error) {
     if (revision !== previewRevision) return;
+    latestPreviewLayout=null;
     byId("fit").textContent = error.message;
     status(error.message, true);
   }
 }
+function previewPoint(event) {
+  const svg=preview.querySelector("svg");
+  const matrix=svg?.getScreenCTM();
+  if(!matrix)return null;
+  const point=svg.createSVGPoint();
+  point.x=event.clientX;point.y=event.clientY;
+  return point.matrixTransform(matrix.inverse());
+}
+function focusPreviewTarget(target) {
+  const block=target.blockId?documentModel.rows.flatMap(row=>row.blocks).find(item=>item.id===target.blockId):null;
+  if(target.blockId){
+    selectedId=target.blockId;
+    refreshSections();refreshProperties();
+  }
+  const field=target.field==="score_rows"&&block?.type==="score_table"&&block.show_total&&target.lineIndex>=block.score_rows.length?"total_label":target.field;
+  const input=field==="footer"?byId("footer"):
+    byId("properties").querySelector(`[data-preview-field="${field}"]`)||byId("properties").querySelector('[data-preview-field="title"]');
+  if(!input)return;
+  input.focus({preventScroll:true});
+  if(input.tagName==="TEXTAREA"&&target.lineIndex!==undefined){
+    const {start,end}=lineSelection(input.value,target.lineIndex);
+    input.setSelectionRange(start,end);
+  }
+  input.scrollIntoView({block:"center"});
+}
+preview.addEventListener("mousemove",event=>{
+  const point=previewPoint(event);
+  preview.style.cursor=point&&previewTargetAt(latestPreviewLayout,point.x,point.y)?"pointer":"";
+});
+preview.addEventListener("click",event=>{
+  const point=previewPoint(event);
+  const target=point&&previewTargetAt(latestPreviewLayout,point.x,point.y);
+  if(target)focusPreviewTarget(target);
+});
 function refresh() {
   byId("title").value = documentModel.title;
   byId("page-size").value = documentModel.page.size;

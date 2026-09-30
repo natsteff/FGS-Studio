@@ -7,7 +7,7 @@ const base=new URL("../vendor/fgs-renderer/",import.meta.url);
 
 test("pinned renderer bundle and notices match the manifest",async()=>{
   const manifest=JSON.parse(await readFile(new URL("manifest.json",base),"utf8"));
-  assert.equal(manifest.profile,"fgs-page-1.3");
+  assert.equal(manifest.profile,"fgs-page-1.3.1");
   assert.ok(manifest.files["browser.mjs"]);
   assert.ok(manifest.files["THIRD_PARTY_NOTICES.md"]);
   for(const [file,expected] of Object.entries(manifest.files)) {
