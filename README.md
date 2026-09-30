@@ -32,6 +32,8 @@ cannot set `frame-ancestors` or replace the host's TLS and header controls.
 - Import a `.fgs` JSON file, validate its structure, and preserve namespaced
   extensions during editing and export.
 - Show a single-page preview with overflow refusal.
+- Click a heading, table label, or list item in the preview to jump to its editor
+  field; clicking a score-row label selects the matching line.
 - Set the sheet's accent color and undo or redo up to 50 editing steps in the
   current tab. A focused typing session counts as one step; opening another
   sheet clears the history.
@@ -47,17 +49,22 @@ cannot set `frame-ancestors` or replace the host's TLS and header controls.
 The SVG preview and selectable-text PDF now use one point-based display list
 from a pinned [FGS Renderer](vendor/fgs-renderer/manifest.json) build, also
 used by Forge GameSheets. Forge's Page Rendering
-Profile 1.3 ([specification](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_PAGE_RENDERING_PROFILE_1_3.md))
+Profile 1.3.1 ([specification](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_PAGE_RENDERING_PROFILE_1_3.md))
 specifies page geometry, fonts, accent
 titles, category weight, and overflow behavior. The
 renderer bundles Noto fonts under the SIL Open Font License; no CDN or document
 upload is used.
 
+The preview is also a navigation aid: click rendered text to select its section
+and focus the source field. For a score-row label such as “1,” Studio selects
+that row's line in **Score rows**. Editing still happens in the controls, not
+directly on the preview.
+
 The renderer source for this pinned build is Forge's
 [`packages/fgs-renderer/`](https://github.com/natsteff/forge-gamesheets/tree/main/packages/fgs-renderer).
 The last published Studio baseline was synced against Forge source revision
 [`d29ac8e`](https://github.com/natsteff/forge-gamesheets/commit/d29ac8e). This
-unpublished local trial pins the renderer from Forge commit `b724332`. It must
+unpublished local trial pins the renderer from Forge commit `b6a10e1`. It must
 not be described as a published revision until both repositories are pushed.
 
 **Known prototype limits:** The Page Rendering Profile does not yet cover every
