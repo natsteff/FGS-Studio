@@ -33,7 +33,18 @@ async function updatePrintPlan(){
     byId("print-sheet-preview").innerHTML=engine.toPrintSheetSvg(layout,printSheetOptions());
   }catch(error){if(revision===printPlanRevision){byId("print-plan").textContent=error.message;byId("print-sheet-preview").innerHTML="";}}
 }
-function updatePrintControls(){const preset=byId("print-size").value;byId("custom-size").hidden=preset!=="custom";byId("export-print-sheet").disabled=preset==="full";byId("export-print-sheet").title=preset==="full"?"Full Page already occupies the printer sheet; use Download PDF.":"";refreshPreview();}
+function updatePrintControls(){
+  const preset=byId("print-size").value,compact=preset!=="full";
+  const pdf=byId("export-pdf"),printSheet=byId("export-print-sheet");
+  pdf.classList.toggle("secondary",compact);
+  printSheet.classList.toggle("secondary",!compact);
+  if(compact)pdf.parentElement.insertBefore(printSheet,pdf);
+  else pdf.parentElement.insertBefore(pdf,printSheet);
+  byId("custom-size").hidden=preset!=="custom";
+  printSheet.disabled=!compact;
+  printSheet.title=compact?"":"Full Page already occupies the printer sheet; use Download PDF.";
+  refreshPreview();
+}
 function resetPrintSize(){byId("print-size").value="full";updatePrintControls();}
 const history = createEditHistory();
 const snapshot = () => ({document: documentModel, selectedId});

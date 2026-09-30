@@ -18,7 +18,7 @@
       <label class="button secondary">Import FGS<input id="import" type="file" accept=".fgs,application/json" hidden></label>
       <button id="export-fgs" type="button">Download FGS</button>
       <button id="export-pdf" type="button">Download PDF</button>
-      <button id="export-print-sheet" type="button" class="secondary">Arrange copies…</button>
+      <button id="export-print-sheet" type="button" class="secondary">Create print sheet</button>
     </nav>
   </header>
   <div class="notice">Your sheet stays in this browser tab. Download an FGS file to keep an editable copy; nothing is uploaded or saved on a server.</div>
@@ -52,7 +52,7 @@
         <button id="undo" type="button" class="secondary" disabled>↶ Undo</button>
         <button id="redo" type="button" class="secondary" disabled>↷ Redo</button>
       </div>
-      <p class="print-note">Choose the finished size before composing this sheet. For ordinary Letter/A4 printers, use Arrange copies; direct Download PDF makes one finished-size page without cut guides. Custom Width and Height set its orientation directly. Finished size is not saved in .fgs during this trial; note the intended size in Designer Notes and reselect it after reopening.</p>
+      <p class="print-note">Choose the finished size before composing this sheet. For ordinary Letter/A4 printers, use Create print sheet; direct Download PDF makes one finished-size page without cut guides. Custom Width and Height set its orientation directly. Finished size is not saved in .fgs during this trial; note the intended size in Designer Notes and reselect it after reopening.</p>
       <p id="fit" class="fit-info" aria-live="polite"></p>
       <div id="preview" class="sheet-preview" aria-label="Printable sheet preview"></div>
     </section>

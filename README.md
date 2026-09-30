@@ -82,7 +82,7 @@ Bridge Card and Custom Size. In the local small-format trial, each size is an
 intentional sheet design: headings and content wrap, then the complete composition
 is uniformly fitted if needed. The preview reports the scale and approximate body
 type size for the designer to judge. Preview and PDF share the finished-size layout;
-copy-layout export places identical sheets on Letter or A4, with optional cut
+**Create print sheet** places identical sheets on Letter or A4, with optional cut
 guides and a 0.5-inch printable margin. The dialog states the PDF orientation,
 copies per page, and total pages. Eight poker cards use two pages (six plus
 two); direct Download PDF makes one card-sized page without cut guides and
