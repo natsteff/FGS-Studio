@@ -55,7 +55,10 @@ upload is used.
 
 The renderer source for this pinned build is Forge's
 [`packages/fgs-renderer/`](https://github.com/natsteff/forge-gamesheets/tree/main/packages/fgs-renderer).
-This Studio update was synced against Forge source revision [`d29ac8e`](https://github.com/natsteff/forge-gamesheets/commit/d29ac8e).
+The last published Studio baseline was synced against Forge source revision
+[`d29ac8e`](https://github.com/natsteff/forge-gamesheets/commit/d29ac8e). The
+current local print-size work uses the adjacent Forge renderer source and must
+record its new Forge commit when it is published.
 
 **Known prototype limits:** The Page Rendering Profile does not yet cover every
 Unicode script. FGSZ, general image sections,
@@ -74,6 +77,18 @@ One section generates all repeated marks. Use fixed height/count to combine
 patterns with other sections; **Fill remaining page** must be last and full width.
 Spacing is editable in millimeters/inches and saved in quarter-point increments.
 Print at **actual size (100%)**. Overflow is refused rather than clipped or shrunk.
+The Print size control also offers Full Page (unchanged), Half Page, Poker Card,
+Bridge Card and Custom Size. This first mode reflows at readable type sizes; it
+does not proportionally shrink a full-page design. Preview and PDF share the finished-size layout;
+copy-layout export places identical sheets on Letter or A4, with optional cut
+guides and a 0.5-inch printable margin. The dialog states the PDF orientation,
+copies per page, and total pages. Eight poker cards use two pages (six plus
+two); direct Download PDF makes one card-sized page without cut guides and
+requires suitable card stock or borderless printing. In the printer dialog,
+choose the PDF's paper and orientation, Actual size / 100%, and disable Fit to
+page. Exact two-up Half Page needs the explicit borderless choice. This print
+selection is not in `.fgs` yet: record a recommendation in Designer Notes and
+reselect the size when reopening the file. Notes do not control rendering.
 Starting values print as guidance; writable spaces remain blank. Studio has no
 LiveSheet backend. Forge provides host-controlled temporary shared tracker state.
 Health measurement logs, MusicXML import, musical notation and multipage output

@@ -1,6 +1,6 @@
-import {addRow, fileStem, newBlock, newDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=13";
+import {addRow, fileStem, newBlock, newDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=15";
 import {createEditHistory} from "./history.js";
-import {loadPrintEngine, prepareHeaderLogo,contentControls,validateFill,applyPaperTemplate} from "../vendor/fgs-renderer/browser.mjs?profile=fgs-page-1.3&layout=3";
+import {loadPrintEngine, prepareHeaderLogo,contentControls,validateFill,applyPaperTemplate} from "../vendor/fgs-renderer/browser.mjs?profile=fgs-page-1.3&layout=5";
 
 let documentModel = newDocument();
 let selectedId = documentModel.rows[0].blocks[0].id;
@@ -9,6 +9,31 @@ const preview = byId("preview");
 const sectionRoot = byId("sections");
 const printEngine = loadPrintEngine(new URL("../vendor/fgs-renderer/", import.meta.url));
 let previewRevision = 0;
+let printPlanRevision = 0;
+function printSizeSelection() {
+  const selection={preset:byId("print-size").value};
+  if(selection.preset==="custom")Object.assign(selection,{width:byId("custom-width").value,height:byId("custom-height").value,unit:byId("custom-unit").value});
+  return selection;
+}
+function syncCustomBounds(){const cm=byId("custom-unit").value==="cm";for(const id of ["custom-width","custom-height"]){byId(id).min=cm?"1.27":"0.5";byId(id).max=cm?"35.56":"14";}}
+function printSheetOptions(){return {paper:byId("print-paper").value,copies:Number(byId("print-copies").value),cutGuides:byId("cut-guides").checked,borderless:byId("borderless").checked};}
+async function updatePrintPlan(){
+  const revision=++printPlanRevision;
+  const eligible=byId("print-size").value==="half"&&byId("print-paper").value===documentModel.page.size;
+  byId("borderless").disabled=!eligible;
+  if(!eligible)byId("borderless").checked=false;
+  try {
+    const engine=await printEngine;
+    const layout=engine.layout(documentModel,printSizeSelection());
+    if(!layout.fits)throw new Error(layout.reason || `“${layout.overflow}” does not fit at the selected print size.`);
+    const plan=engine.printSheetPlan(layout,printSheetOptions());
+    if(revision!==printPlanRevision)return;
+    const counts=plan.pages.map(page=>page.length).join(" + ");
+    byId("print-plan").textContent=`Output: ${plan.paper.toUpperCase()} ${plan.orientation} PDF; ${plan.capacity} ${plan.capacity===1?"copy":"copies"} per page. ${plan.pages.length} ${plan.pages.length===1?"page":"pages"} (${counts}). ${plan.borderless?"Edge-to-edge printing required.":"0.5-inch printable margin, including cut guides."}`;
+  }catch(error){if(revision===printPlanRevision)byId("print-plan").textContent=error.message;}
+}
+function updatePrintControls(){const preset=byId("print-size").value;byId("custom-size").hidden=preset!=="custom";byId("export-print-sheet").disabled=preset==="full";byId("export-print-sheet").title=preset==="full"?"Full Page already occupies the printer sheet; use Download PDF.":"";refreshPreview();}
+function resetPrintSize(){byId("print-size").value="full";updatePrintControls();}
 const history = createEditHistory();
 const snapshot = () => ({document: documentModel, selectedId});
 function historyButtons() {
@@ -196,15 +221,15 @@ async function refreshPreview() {
   try {
     validate(documentModel);
     const engine = await printEngine;
-    const layout = engine.layout(documentModel);
+    const layout = engine.layout(documentModel,printSizeSelection());
     if (revision !== previewRevision) return;
     preview.innerHTML = engine.toSvg(layout);
-    byId("fit").textContent = layout.fits ? "Fits one page" : `“${layout.overflow}” does not fit on one page`;
+    byId("fit").textContent = layout.fits ? "Fits selected size" : (layout.reason || `“${layout.overflow}” does not fit at the selected print size`);
     byId("fit").style.color = layout.fits ? "#256642" : "#b2211e";
     status("");
   } catch (error) {
     if (revision !== previewRevision) return;
-    byId("fit").textContent = "Invalid draft";
+    byId("fit").textContent = error.message;
     status(error.message, true);
   }
 }
@@ -229,6 +254,10 @@ function download(blob, filename) {
 focusedEdit(byId("title"), "input", (input) => {documentModel.title=input.value;});
 byId("page-size").addEventListener("change", (event) => {edit(() => {documentModel.page.size=event.target.value;});refreshPreview();});
 byId("orientation").addEventListener("change", (event) => {edit(() => {documentModel.page.orientation=event.target.value;});refreshPreview();});
+byId("print-size").addEventListener("change",updatePrintControls);
+["custom-width","custom-height","custom-unit"].forEach(id=>byId(id).addEventListener("change",()=>{syncCustomBounds();refreshPreview();}));
+syncCustomBounds();
+byId("export-print-sheet").disabled=true;
 focusedEdit(byId("accent"), "input", (input) => {documentModel.theme.accent=input.value;});
 focusedEdit(byId("footer"), "change", (input) => {
   const footer = input.value.trim();
@@ -254,6 +283,7 @@ byId("new-form").addEventListener("submit",event=>{
   event.preventDefault();
   if(!confirm("Start a new sheet? Download your current FGS first if you want to keep it."))return;
   documentModel=applyPaperTemplate(newDocument(),byId("new-template").value,prefix=>prefix+"-"+crypto.randomUUID());
+  resetPrintSize();
   selectedId=documentModel.rows[0].blocks[0].id;history.clear();refresh();byId("new-dialog").close();
 });
 byId("import").addEventListener("change", async (event) => {
@@ -263,7 +293,7 @@ byId("import").addEventListener("change", async (event) => {
     if (file.size > 256 * 1024) throw new Error("FGS exceeds 256 KiB");
     const imported = parse(await file.text());
     await verifyLogoImages(imported);
-    documentModel = imported; selectedId=imported.rows[0].blocks[0].id;history.clear();refresh(); status(`Imported ${file.name}.`);
+    documentModel = imported; selectedId=imported.rows[0].blocks[0].id;history.clear();resetPrintSize();refresh(); status(`Imported ${file.name}.`);
   } catch (error) {status(error.message, true);}
   event.target.value = "";
 });
@@ -278,10 +308,33 @@ byId("export-pdf").addEventListener("click", async () => {
   try {
     validate(documentModel);
     const engine = await printEngine;
-    const layout = engine.layout(documentModel);
+    const layout = engine.layout(documentModel,printSizeSelection());
+    if(!layout.fits)throw new Error(layout.reason || `“${layout.overflow}” does not fit at the selected print size.`);
     const pdf = await engine.toPdf(layout, documentModel.title);
     download(new Blob([pdf], {type:"application/pdf"}), `${fileStem(documentModel.title)}.pdf`);
     status("PDF downloaded.");
   } catch (error) {status(error.message, true);}
+});
+byId("export-print-sheet").addEventListener("click",()=>{
+  byId("print-paper").value=documentModel.page.size;
+  byId("borderless").checked=false;
+  byId("print-sheet-dialog").showModal();
+  updatePrintPlan();
+});
+for(const id of ["print-paper","print-copies","cut-guides","borderless"])byId(id).addEventListener("change",updatePrintPlan);
+byId("print-copies").addEventListener("input",updatePrintPlan);
+byId("cancel-print-sheet").addEventListener("click",()=>byId("print-sheet-dialog").close());
+byId("print-sheet-form").addEventListener("submit",async(event)=>{
+  event.preventDefault();
+  try {
+    validate(documentModel);
+    const engine=await printEngine;
+    const layout=engine.layout(documentModel,printSizeSelection());
+    if(!layout.fits)throw new Error(layout.reason || `“${layout.overflow}” does not fit at the selected print size.`);
+    const pdf=await engine.toPrintSheetPdf(layout,documentModel.title,printSheetOptions());
+    download(new Blob([pdf],{type:"application/pdf"}),`${fileStem(documentModel.title)}-print-sheet.pdf`);
+    byId("print-sheet-dialog").close();
+    status("Print-sheet PDF downloaded.");
+  }catch(error){status(error.message,true);}
 });
 refresh();

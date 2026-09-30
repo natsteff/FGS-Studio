@@ -53,6 +53,9 @@ button:disabled{opacity:.55;cursor:not-allowed;filter:none}
 .logo-upload small{color:#68635c;font-size:.76rem;font-weight:500}
 #footer,#designer-notes{display:block;width:100%;min-height:5rem;resize:vertical}
 .preview-heading .accent-control{margin-top:0}
+.custom-size{display:flex;align-items:end;gap:.35rem}.custom-size[hidden]{display:none}.custom-size input{width:4.5rem}.custom-size select{min-width:3.5rem}.print-note{max-width:48rem;margin:0 auto .7rem;color:#68635c;font-size:.78rem;line-height:1.4}
+#print-sheet-dialog label{display:block;margin:.8rem 0}
+.print-hint{color:#68635c;font-size:.78rem;line-height:1.4}.print-plan{padding:.75rem;border:1px solid #e5d9ce;border-radius:.5rem;background:#fbf2e8;font-weight:700;line-height:1.45}
 @media(max-width:1150px){.topbar{grid-template-columns:auto 1fr}.topbar nav{grid-column:1/-1;justify-content:flex-start}}
 @media(max-width:900px){.topbar{display:flex}.topbar nav{justify-content:flex-start}}
 
