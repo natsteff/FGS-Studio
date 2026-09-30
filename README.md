@@ -56,9 +56,9 @@ upload is used.
 The renderer source for this pinned build is Forge's
 [`packages/fgs-renderer/`](https://github.com/natsteff/forge-gamesheets/tree/main/packages/fgs-renderer).
 The last published Studio baseline was synced against Forge source revision
-[`d29ac8e`](https://github.com/natsteff/forge-gamesheets/commit/d29ac8e). The
-current local print-size work uses the adjacent Forge renderer source and must
-record its new Forge commit when it is published.
+[`d29ac8e`](https://github.com/natsteff/forge-gamesheets/commit/d29ac8e). This
+unpublished local trial pins the renderer from Forge commit `da3174d`. It must
+not be described as a published revision until both repositories are pushed.
 
 **Known prototype limits:** The Page Rendering Profile does not yet cover every
 Unicode script. FGSZ, general image sections,
@@ -77,9 +77,11 @@ One section generates all repeated marks. Use fixed height/count to combine
 patterns with other sections; **Fill remaining page** must be last and full width.
 Spacing is editable in millimeters/inches and saved in quarter-point increments.
 Print at **actual size (100%)**. Overflow is refused rather than clipped or shrunk.
-The Print size control also offers Full Page (unchanged), Half Page, Poker Card,
-Bridge Card and Custom Size. This first mode reflows at readable type sizes; it
-does not proportionally shrink a full-page design. Preview and PDF share the finished-size layout;
+The Finished size control also offers Full Page (unchanged), Half Page, Poker Card,
+Bridge Card and Custom Size. In the local small-format trial, each size is an
+intentional sheet design: headings and content wrap, then the complete composition
+is uniformly fitted if needed. The preview reports the scale and approximate body
+type size for the designer to judge. Preview and PDF share the finished-size layout;
 copy-layout export places identical sheets on Letter or A4, with optional cut
 guides and a 0.5-inch printable margin. The dialog states the PDF orientation,
 copies per page, and total pages. Eight poker cards use two pages (six plus

@@ -1,6 +1,6 @@
 import {addRow, fileStem, newBlock, newDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=15";
 import {createEditHistory} from "./history.js";
-import {loadPrintEngine, prepareHeaderLogo,contentControls,validateFill,applyPaperTemplate} from "../vendor/fgs-renderer/browser.mjs?profile=fgs-page-1.3&layout=5";
+import {loadPrintEngine, prepareHeaderLogo,contentControls,validateFill,applyPaperTemplate} from "../vendor/fgs-renderer/browser.mjs?profile=fgs-page-1.3&layout=6";
 
 let documentModel = newDocument();
 let selectedId = documentModel.rows[0].blocks[0].id;
@@ -29,8 +29,9 @@ async function updatePrintPlan(){
     const plan=engine.printSheetPlan(layout,printSheetOptions());
     if(revision!==printPlanRevision)return;
     const counts=plan.pages.map(page=>page.length).join(" + ");
-    byId("print-plan").textContent=`Output: ${plan.paper.toUpperCase()} ${plan.orientation} PDF; ${plan.capacity} ${plan.capacity===1?"copy":"copies"} per page. ${plan.pages.length} ${plan.pages.length===1?"page":"pages"} (${counts}). ${plan.borderless?"Edge-to-edge printing required.":"0.5-inch printable margin, including cut guides."}`;
-  }catch(error){if(revision===printPlanRevision)byId("print-plan").textContent=error.message;}
+    byId("print-plan").textContent=`Output: ${plan.paper.toUpperCase()} ${plan.orientation} PDF; ${plan.capacity} ${plan.capacity===1?"copy":"copies"} per page. ${plan.pages.length} ${plan.pages.length===1?"page":"pages"} (${counts}). Preview shows page 1. ${plan.borderless?"Edge-to-edge printing required.":"0.5-inch printable margin, including cut guides."}`;
+    byId("print-sheet-preview").innerHTML=engine.toPrintSheetSvg(layout,printSheetOptions());
+  }catch(error){if(revision===printPlanRevision){byId("print-plan").textContent=error.message;byId("print-sheet-preview").innerHTML="";}}
 }
 function updatePrintControls(){const preset=byId("print-size").value;byId("custom-size").hidden=preset!=="custom";byId("export-print-sheet").disabled=preset==="full";byId("export-print-sheet").title=preset==="full"?"Full Page already occupies the printer sheet; use Download PDF.":"";refreshPreview();}
 function resetPrintSize(){byId("print-size").value="full";updatePrintControls();}
@@ -224,8 +225,12 @@ async function refreshPreview() {
     const layout = engine.layout(documentModel,printSizeSelection());
     if (revision !== previewRevision) return;
     preview.innerHTML = engine.toSvg(layout);
-    byId("fit").textContent = layout.fits ? "Fits selected size" : (layout.reason || `“${layout.overflow}” does not fit at the selected print size`);
-    byId("fit").style.color = layout.fits ? "#256642" : "#b2211e";
+    preview.style.width=layout.fitScale===undefined?"":`${Math.round(layout.width*96/72)}px`;
+    if(layout.fits&&layout.fitScale!==undefined){
+      const measured=documentModel.rows.some(row=>row.blocks.some(block=>block.type==="paper_pattern"||block.type==="tracker"));
+      byId("fit").textContent=`Fitted at ${Math.round(layout.fitScale*100)}%; body text approximately ${layout.effectiveBodySize.toFixed(1)} pt. Review at finished size.${measured&&layout.fitScale<1?" Pattern spacing and tracker marks also shrink physically.":""}`;
+    }else byId("fit").textContent = layout.fits ? "Fits selected size" : (layout.reason || `“${layout.overflow}” does not fit at the selected print size`);
+    byId("fit").style.color = layout.fits ? "#645f55" : "#b2211e";
     status("");
   } catch (error) {
     if (revision !== previewRevision) return;
