@@ -1,4 +1,4 @@
-import {addRow, fgsFileName, pdfFileName, newBlock, newStudioDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=23";
+import {addRow, fgsFileName, pdfFileName, newBlock, newStudioDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=24";
 import {createEditHistory} from "./history.js";
 import {canMoveSectionTo, moveSectionTo, sectionNeighbor} from "./sheet-order.mjs";
 import {lineSelection, previewTargetAt} from "./preview-navigation.mjs";
@@ -373,6 +373,36 @@ byId("new").addEventListener("click", () => {
   byId("new-template").value = "score_sheet";
   byId("new-dialog").showModal();
 });
+byId("example-sheets").addEventListener("click", async () => {
+  const dialog=byId("examples-dialog"),list=byId("examples-list"),message=byId("examples-status");
+  list.replaceChildren();message.textContent="Loading example sheets…";dialog.showModal();
+  try {
+    const response=await fetch(new URL("../examples/catalog.json",import.meta.url));
+    if(!response.ok)throw new Error("Example sheets could not be loaded.");
+    const catalog=await response.json();
+    if(!Array.isArray(catalog))throw new Error("The example catalog is invalid.");
+    message.textContent=catalog.length?"":"No example sheets are included in this build yet.";
+    for(const entry of catalog){
+      if(typeof entry.file!=="string"||!/^[a-z0-9][a-z0-9-]*\.fgs$/.test(entry.file)||typeof entry.title!=="string"||typeof entry.description!=="string")throw new Error("The example catalog is invalid.");
+      const card=element("article",{className:"example-card"});
+      card.append(element("h3",{text:entry.title}),element("p",{text:entry.description}));
+      card.append(button("Use this example",async () => {
+        try {
+          const sheetResponse=await fetch(new URL(`../examples/${entry.file}`,import.meta.url));
+          if(!sheetResponse.ok)throw new Error("This example could not be loaded.");
+          const imported=parse(await sheetResponse.text());
+          await verifyLogoImages(imported);
+          if(!confirm("Open this example? Download your current FGS first if you want to keep it."))return;
+          documentModel=imported;selectedId=imported.rows[0].blocks[0].id;
+          history.clear();resetPrintSize();refresh();dialog.close();
+          status(`Opened a copy of ${imported.title}. Download FGS to keep your changes.`);
+        }catch(error){message.textContent=error.message;}
+      }));
+      list.append(card);
+    }
+  }catch(error){list.replaceChildren();message.textContent=error.message;}
+});
+byId("close-examples").addEventListener("click",()=>byId("examples-dialog").close());
 byId("cancel-new").addEventListener("click",()=>byId("new-dialog").close());
 byId("new-form").addEventListener("submit",event=>{
   event.preventDefault();

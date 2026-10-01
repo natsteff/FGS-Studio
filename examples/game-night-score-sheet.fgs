@@ -1,0 +1,12 @@
+{
+  "format": "forge-gamesheets",
+  "format_version": "1.0",
+  "id": "game-night-score-sheet",
+  "title": "Game Night Score Sheet",
+  "page": {"size": "letter", "orientation": "portrait"},
+  "theme": {"accent": "#c84b24"},
+  "rows": [
+    {"id": "game-night-header", "blocks": [{"id": "game-night-heading", "type": "header", "title": "Game Night Score Sheet", "subtitle": "A simple score sheet to customize for your own game."}]},
+    {"id": "game-night-scores", "blocks": [{"id": "game-night-table", "type": "score_table", "title": "Scores", "players": ["Player 1", "Player 2", "Player 3", "Player 4"], "score_rows": ["Round 1", "Round 2", "Round 3", "Round 4", "Round 5", "Total"], "show_total": false, "total_label": "Total"}]}
+  ]
+}

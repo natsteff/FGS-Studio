@@ -1,0 +1,81 @@
+{
+  "designer_notes": "Printable blood pressure tracking log. The score table is used as a generic writable entry table; player headings represent data fields rather than game players.",
+  "footer": "Adult BP (mm Hg): Normal <120 and <80; Elevated 120–129 and <80; Stage 1: 130–139 or 80–89.\nStage 2: >=140 or >=90. Source: American Heart Association.",
+  "format": "forge-gamesheets",
+  "format_version": "1.2",
+  "id": "blood_pressure_log",
+  "page": {
+    "orientation": "portrait",
+    "size": "letter"
+  },
+  "rows": [
+    {
+      "blocks": [
+        {
+          "id": "bp_header",
+          "subtitle": "Record blood pressure and pulse readings over time.",
+          "title": "Blood Pressure Log",
+          "type": "header"
+        }
+      ],
+      "id": "bp_header_row"
+    },
+    {
+      "blocks": [
+        {
+          "first_column_heading": "Entry",
+          "id": "bp_table",
+          "players": [
+            "Date",
+            "Time",
+            "Systolic",
+            "Diastolic",
+            "Pulse",
+            "Notes"
+          ],
+          "score_rows": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26",
+            "27",
+            "28",
+            "29",
+            "30"
+          ],
+          "show_total": false,
+          "title": "Blood Pressure Entries",
+          "total_label": "Total",
+          "type": "score_table"
+        }
+      ],
+      "id": "bp_table_row"
+    }
+  ],
+  "theme": {
+    "accent": "#8f3b3b"
+  },
+  "title": "Blood Pressure Log"
+}

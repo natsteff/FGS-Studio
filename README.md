@@ -17,6 +17,15 @@ tab. Download the `.fgs` file to keep an editable copy; download PDF for
 printing. Closing or reloading the tab loses unsaved edits. FGS documents are
 not transmitted to the host or any API.
 
+**Example sheets** opens editable copies of bundled FGS files in the current
+tab. The chooser sits between New and Import FGS; it is not a saved-sheet
+library. Download FGS before opening an example if you want to retain your
+current work. Examples are public files in the static site, including the
+game-specific sheets supplied for this beta. They are unofficial starting
+points, not affiliated with or endorsed by the named game or product makers,
+and not medical or manufacturer guidance. Verify relevant details independently
+before use.
+
 The static page uses a restrictive Content Security Policy to limit active
 content to same-origin files. The included Pages workflow publishes static files
 without app-defined response headers, so the policy is in an HTML meta tag; it
@@ -107,13 +116,22 @@ are not included. Screenshots may show the earlier published feature set.
 
 ## Run and test locally
 
-Serve the repository directory with any static-file server and open its root
-page. A local server is only for development; GitHub Pages serves the same
-files without an application backend. With Python, for example:
+Build the static site, serve `dist/`, and open its root page. The build
+validates and includes the example catalog. A local server is only for
+development; GitHub Pages serves the same files without an application backend.
+With Python, for example:
 
 ```sh
+node scripts/build.mjs
+cd dist
 python3 -m http.server 8765
 ```
+
+To add a public example, put an approved lowercase hyphenated `.fgs` file in
+[`examples/`](examples/) and rebuild. The build derives its display title and
+description from the document; no hand-maintained list is needed. Every file
+in that folder becomes publicly downloadable after publication. Keep private
+or unreviewed candidates outside it; see the [example review rules](examples/README.md).
 
 Run the browser-app tests and production packaging with Node.js:
 

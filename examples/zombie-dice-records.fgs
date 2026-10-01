@@ -1,0 +1,118 @@
+{
+  "designer_notes": "Persistent Zombie Dice records sheet. Prime Zombie records the highest final brain total. Alpha Zombie records the largest winning margin over second place. Feeding Frenzy records the most brains successfully banked during a single turn; brains from a busted turn do not count.",
+  "footer": "Feeding Frenzy = most brains banked in one turn. Alpha Zombie = largest final-score margin over second place.\nCustomize this sheet (with source FGS file) at https://natsteff.github.io/FGS-Studio/",
+  "format": "forge-gamesheets",
+  "format_version": "1.2",
+  "id": "zombie_dice_records",
+  "page": {
+    "orientation": "portrait",
+    "size": "letter"
+  },
+  "rows": [
+    {
+      "blocks": [
+        {
+          "id": "header",
+          "subtitle": "The hungriest zombies live forever.",
+          "title": "Zombie Dice Records",
+          "type": "header"
+        }
+      ],
+      "id": "header_row"
+    },
+    {
+      "blocks": [
+        {
+          "first_column_heading": "Record",
+          "id": "prime_zombie",
+          "players": [
+            "Player",
+            "Brains",
+            "Date"
+          ],
+          "score_rows": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15"
+          ],
+          "show_total": false,
+          "title": "Prime Zombie - Most Brains at Game End",
+          "total_label": "Total",
+          "type": "score_table"
+        }
+      ],
+      "id": "prime_zombie_row"
+    },
+    {
+      "blocks": [
+        {
+          "first_column_heading": "Record",
+          "id": "alpha_zombie",
+          "players": [
+            "Player",
+            "Margin",
+            "Date"
+          ],
+          "score_rows": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10"
+          ],
+          "show_total": false,
+          "title": "Alpha Zombie - Biggest Win",
+          "total_label": "Total",
+          "type": "score_table"
+        },
+        {
+          "first_column_heading": "Record",
+          "id": "feeding_frenzy",
+          "players": [
+            "Player",
+            "Brains",
+            "Date"
+          ],
+          "score_rows": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10"
+          ],
+          "show_total": false,
+          "title": "Feeding Frenzy - Best Single Round",
+          "total_label": "Total",
+          "type": "score_table"
+        }
+      ],
+      "id": "secondary_records_row"
+    }
+  ],
+  "theme": {
+    "accent": "#7a1f1f"
+  },
+  "title": "Zombie Dice - Records"
+}

@@ -1,0 +1,85 @@
+{
+  "format": "forge-gamesheets",
+  "format_version": "1.0",
+  "id": "zombie-dice-score-sheet-v1",
+  "title": "Zombie Dice Score Sheet",
+  "page": {
+    "size": "letter",
+    "orientation": "landscape"
+  },
+  "theme": {
+    "accent": "#000000"
+  },
+  "rows": [
+    {
+      "id": "row-header",
+      "blocks": [
+        {
+          "id": "block-header",
+          "type": "header",
+          "title": "Zombie Dice",
+          "subtitle": "Track brains eaten each round."
+        }
+      ]
+    },
+    {
+      "id": "row-scoring",
+      "blocks": [
+        {
+          "id": "block-scoring",
+          "type": "score_table",
+          "title": "Brains Eaten",
+          "players": [
+            "Zombie 1",
+            "Zombie 2",
+            "Zombie 3",
+            "Zombie 4",
+            "Zombie 5",
+            "Zombie 6",
+            "Zombie 7",
+            "Zombie 8"
+          ],
+          "score_rows": [
+            "Brains Eaten (Round 1)",
+            "Brains Eaten (Round 2)",
+            "Brains Eaten (Round 3)",
+            "Brains Eaten (Round 4)",
+            "Brains Eaten (Round 5)",
+            "Brains Eaten (Round 6)",
+            "Brains Eaten (Round 7)",
+            "Brains Eaten (Round 8)",
+            "Brains Eaten (Round 9)",
+            "Brains Eaten (Round 10)",
+            "Brains Eaten (Round 11)",
+            "Brains Eaten (Round 12)",
+            "Brains Eaten (Round 13)",
+            "Total"
+          ],
+          "show_total": false,
+          "total_label": "Total"
+        }
+      ]
+    },
+    {
+      "id": "row-game-notes",
+      "blocks": [
+        {
+          "id": "block-game-notes",
+          "type": "reference",
+          "title": "Game Notes",
+          "items": [
+            "Reach at least 13 brains to trigger the final round.",
+            "After a zombie reaches 13 or more brains, the other zombies each get one final turn.",
+            "Highest brain total after the final turns wins."
+          ]
+        }
+      ]
+    }
+  ],
+  "extensions": {
+    "io.github.natsteff.livesheet": {
+      "version": 1,
+      "enabled": true
+    }
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "designer_notes": "This needs to be portrait orientation for all details to be displayed",
+  "extensions": {
+    "io.github.natsteff.livesheet": {
+      "enabled": true,
+      "version": 1
+    }
+  },
+  "format": "forge-gamesheets",
+  "format_version": "1.2",
+  "id": "2021-polaris-rzr-xp1000-maintenance-log-v1",
+  "page": {
+    "orientation": "portrait",
+    "size": "letter"
+  },
+  "rows": [
+    {
+      "blocks": [
+        {
+          "id": "block-header",
+          "subtitle": "Factory maintenance intervals based on Polaris Owner's Manual 9931524 R02.",
+          "title": "2021 Polaris RZR XP 1000 Maintenance Log",
+          "type": "header"
+        }
+      ],
+      "id": "row-header"
+    },
+    {
+      "blocks": [
+        {
+          "first_column_heading": "Service Iteration",
+          "id": "block-service-log",
+          "players": [
+            "Date",
+            "Miles",
+            "Hours",
+            "Service / Repair",
+            "Parts / Fluids",
+            "Cost"
+          ],
+          "score_rows": [
+            "Service 1",
+            "Service 2",
+            "Service 3",
+            "Service 4",
+            "Service 5",
+            "Service 6",
+            "Service 7",
+            "Service 8",
+            "Service 9"
+          ],
+          "show_total": false,
+          "title": "Service History",
+          "total_label": "Total",
+          "type": "score_table"
+        }
+      ],
+      "id": "row-service-log"
+    },
+    {
+      "blocks": [
+        {
+          "id": "block-routine-intervals",
+          "items": [
+            "25 hr / 1 month: break-in engine oil and filter change.",
+            "Every 50 hr / 6 months: engine oil and filter.",
+            "50 hr / 500 mi: inspect brakes, belt, clutches, shocks, cooling system; lubricate chassis.",
+            "100 hr / 1,000 mi: change front gearcase and transmission fluids; inspect spark plugs, bearings, radiator and cooling hoses."
+          ],
+          "title": "Factory Intervals",
+          "type": "reference"
+        },
+        {
+          "id": "block-long-term-intervals",
+          "items": [
+            "Every 2 years: replace DOT 4 brake fluid.",
+            "250 hr / 2,500 mi: replace or rebuild shock absorbers as applicable.",
+            "500 hr / 5,000 mi: replace coolant and spark plugs; inspect valve clearance.",
+            "After 500 hr / 5,000 mi: restart the maintenance interval cycle."
+          ],
+          "title": "Long-Term Service",
+          "type": "reference"
+        }
+      ],
+      "id": "row-factory-intervals"
+    },
+    {
+      "blocks": [
+        {
+          "id": "block-factory-fluids",
+          "items": [
+            "Engine: Polaris PS-4 5W-50 or PS-4 Extreme Duty 10W-50.",
+            "Transmission: Polaris AGL Gearcase Lubricant & Transmission Fluid.",
+            "Front gearcase: Polaris Demand Drive Fluid.",
+            "Brakes: DOT 4 Brake Fluid.",
+            "Prop shaft: U-Joint Grease; stabilizer bushings: All Season or NLGI No. 2 grease."
+          ],
+          "title": "Factory Fluids",
+          "type": "reference"
+        },
+        {
+          "id": "block-severe-use",
+          "items": [
+            "Service more often for frequent mud, water or sand exposure.",
+            "Also considered severe: high-RPM use, heavy low-speed loads, extended idling and frequent short cold-weather trips.",
+            "Inspect air intake, belt, fluids, brakes and lubrication more frequently when conditions require."
+          ],
+          "title": "Severe Use",
+          "type": "reference"
+        }
+      ],
+      "id": "row-fluids-severe-use"
+    }
+  ],
+  "theme": {
+    "accent": "#000000"
+  },
+  "title": "2021 Polaris RZR XP 1000 Maintenance Log"
+}

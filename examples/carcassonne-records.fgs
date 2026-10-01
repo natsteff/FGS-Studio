@@ -1,0 +1,112 @@
+{
+  "format": "forge-gamesheets",
+  "format_version": "1.2",
+  "id": "carcassonne_records",
+  "title": "Carcassonne Records",
+  "page": {
+    "size": "letter",
+    "orientation": "portrait"
+  },
+  "theme": {
+    "accent": "#8b2f2f"
+  },
+  "rows": [
+    {
+      "id": "records_header_row",
+      "blocks": [
+        {
+          "id": "records_header",
+          "type": "header",
+          "title": "Carcassonne Records",
+          "subtitle": "Keep a history of new records as they are set."
+        }
+      ]
+    },
+    {
+      "id": "high_score_row",
+      "blocks": [
+        {
+          "id": "high_score_table",
+          "type": "score_table",
+          "title": "High Score",
+          "first_column_heading": "Record",
+          "players": [
+            "Player",
+            "Score",
+            "Date"
+          ],
+          "score_rows": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15"
+          ],
+          "show_total": false,
+          "total_label": "Total"
+        }
+      ]
+    },
+    {
+      "id": "feature_records_row",
+      "blocks": [
+        {
+          "id": "longest_road_table",
+          "type": "score_table",
+          "title": "Longest Road",
+          "first_column_heading": "Record",
+          "players": [
+            "Player",
+            "Tiles",
+            "Date"
+          ],
+          "score_rows": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7"
+          ],
+          "show_total": false,
+          "total_label": "Total"
+        },
+        {
+          "id": "largest_city_table",
+          "type": "score_table",
+          "title": "Largest City",
+          "first_column_heading": "Record",
+          "players": [
+            "Player",
+            "Tiles",
+            "Date"
+          ],
+          "score_rows": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7"
+          ],
+          "show_total": false,
+          "total_label": "Total"
+        }
+      ]
+    }
+  ],
+  "footer": "Add an entry whenever a new record is set. Keep earlier entries to preserve the history of each record.",
+  "designer_notes": "Persistent Carcassonne records sheet intended to remain in the game box. High Score tracks the progression of record scores rather than a ranked leaderboard. Longest Road and Largest City similarly record each new record as it is achieved. Score tables are intentionally used as generic writable record tables."
+}
