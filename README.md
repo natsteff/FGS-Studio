@@ -64,10 +64,10 @@ directly on the preview.
 
 The renderer source for this pinned build is Forge's
 [`packages/fgs-renderer/`](https://github.com/natsteff/forge-gamesheets/tree/main/packages/fgs-renderer).
-The last published Studio baseline was synced against Forge source revision
-[`d29ac8e`](https://github.com/natsteff/forge-gamesheets/commit/d29ac8e). This
-unpublished local trial pins the renderer from Forge commit `b6a10e1`. It must
-not be described as a published revision until both repositories are pushed.
+The current pinned renderer was built from Forge source revision
+[`b6a10e1`](https://github.com/natsteff/forge-gamesheets/commit/b6a10e1).
+Its manifest verifies the source and artifact hashes; subsequent Forge changes
+to the editor have not changed this renderer build.
 
 **Known prototype limits:** The Page Rendering Profile does not yet cover every
 Unicode script. FGSZ, general image sections,
@@ -87,7 +87,7 @@ patterns with other sections; **Fill remaining page** must be last and full widt
 Spacing is editable in millimeters/inches and saved in quarter-point increments.
 Print at **actual size (100%)**. Overflow is refused rather than clipped or shrunk.
 The Finished size control also offers Full Page (unchanged), Half Page, Poker Card,
-Bridge Card and Custom Size. In the local small-format trial, each size is an
+Bridge Card and Custom Size. In the small-format beta, each size is an
 intentional sheet design: headings and content wrap, then the complete composition
 is uniformly fitted if needed. The preview reports the scale and approximate body
 type size for the designer to judge. Preview and PDF share the finished-size layout;
