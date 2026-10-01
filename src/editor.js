@@ -1,10 +1,10 @@
-import {addRow, fgsFileName, pdfFileName, newBlock, newDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=21";
+import {addRow, fgsFileName, pdfFileName, newBlock, newStudioDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=22";
 import {createEditHistory} from "./history.js";
 import {canMoveSectionTo, moveSectionTo, sectionNeighbor} from "./sheet-order.mjs";
 import {lineSelection, previewTargetAt} from "./preview-navigation.mjs";
 import {loadPrintEngine, prepareHeaderLogo,contentControls,validateFill,applyPaperTemplate} from "../vendor/fgs-renderer/browser.mjs?profile=fgs-page-1.3.1&layout=9";
 
-let documentModel = newDocument();
+let documentModel = newStudioDocument();
 let selectedId = documentModel.rows[0].blocks[0].id;
 const byId = (name) => document.getElementById(name);
 const preview = byId("preview");
@@ -377,7 +377,7 @@ byId("cancel-new").addEventListener("click",()=>byId("new-dialog").close());
 byId("new-form").addEventListener("submit",event=>{
   event.preventDefault();
   if(!confirm("Start a new sheet? Download your current FGS first if you want to keep it."))return;
-  documentModel=applyPaperTemplate(newDocument(),byId("new-template").value,prefix=>prefix+"-"+crypto.randomUUID());
+  documentModel=applyPaperTemplate(newStudioDocument(),byId("new-template").value,prefix=>prefix+"-"+crypto.randomUUID());
   resetPrintSize();
   selectedId=documentModel.rows[0].blocks[0].id;history.clear();refresh();byId("new-dialog").close();
 });

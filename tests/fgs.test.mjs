@@ -1,10 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
-import {addRow, fgsFileName, pdfFileName, newDocument, parse, validate} from "../src/fgs.js";
+import {addRow, fgsFileName, pdfFileName, newDocument, newStudioDocument, STUDIO_DEFAULT_FOOTER, parse, validate} from "../src/fgs.js";
 import {render} from "../src/render.js";
 import {previewHtml} from "../src/forge-preview.js";
-import {createPrintEngine, PROFILE} from "../vendor/fgs-renderer/browser.mjs";
+import {applyPaperTemplate, createPrintEngine, PROFILE} from "../vendor/fgs-renderer/browser.mjs";
 
 test("accent picker sits with page controls", () => {
   const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
@@ -47,6 +47,29 @@ test("a new FGS 1.0 document validates and survives JSON export/import", () => {
   const sheet = newDocument();
   assert.equal(validate(sheet), sheet);
   assert.deepEqual(parse(JSON.stringify(sheet)), sheet);
+});
+test("new Studio sheets include an editable GitHub footer without changing imports", () => {
+  const sheet = newStudioDocument();
+  assert.equal(sheet.format_version, "1.1");
+  assert.equal(sheet.footer, "Customize this sheet (with source FGS file) at https://github.com/natsteff/forge-gamesheets");
+  assert.equal(sheet.footer, STUDIO_DEFAULT_FOOTER);
+  assert.deepEqual(parse(JSON.stringify(sheet)), sheet);
+  const editor = readFileSync(new URL("../src/editor.js", import.meta.url), "utf8");
+  assert.match(editor, /let documentModel = newStudioDocument\(\)/);
+  assert.match(editor, /applyPaperTemplate\(newStudioDocument\(\)/);
+  const imported = parse(readFileSync(new URL("./fixtures/example.fgs", import.meta.url), "utf8"));
+  assert.equal(imported.format_version, "1.0");
+  assert.equal(imported.footer, undefined);
+  const fontsRoot = new URL("../vendor/fgs-renderer/fonts/", import.meta.url);
+  const fonts = Object.fromEntries([
+    ["sans", "NotoSans-Regular.ttf"], ["bold", "NotoSans-Bold.ttf"], ["serif", "NotoSerif-Bold.ttf"]
+  ].map(([key, filename]) => [key, new Uint8Array(readFileSync(new URL(filename, fontsRoot)))]));
+  const layout = createPrintEngine(fonts).layout(sheet);
+  assert.equal(layout.fits, true);
+  assert.ok(layout.commands.some(command => command.value === STUDIO_DEFAULT_FOOTER));
+  const paper = applyPaperTemplate(newStudioDocument(), "ruled", prefix => `${prefix}-test`);
+  assert.equal(paper.format_version, "1.3");
+  assert.equal(paper.footer, STUDIO_DEFAULT_FOOTER);
 });
 test("each supported section type can be created", () => {
   const sheet = newDocument();
