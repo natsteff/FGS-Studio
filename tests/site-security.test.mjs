@@ -22,6 +22,11 @@ test("the static editor limits active content to local assets", () => {
 });
 
 test("the footer links to the full FORGE GameSheets project", () => {
-  assert.match(html, /<footer><a href="https:\/\/github\.com\/natsteff\/forge-gamesheets" target="_blank" rel="noopener noreferrer">FORGE GameSheets on GitHub ↗<\/a><\/footer>/);
+  assert.match(html, /<footer><span>Privacy: FGS Studio does not upload or save your sheet on a server\.<\/span><a href="https:\/\/github\.com\/natsteff\/forge-gamesheets" target="_blank" rel="noopener noreferrer">FORGE GameSheets on GitHub ↗<\/a><\/footer>/);
   assert.doesNotMatch(html, /FGS Studio · FGS 1\.0/);
+});
+
+test("saving reminder sits with the document actions, not in a page-wide banner", () => {
+  assert.match(html, /<div class="topbar-actions">[\s\S]*<nav aria-label="Document actions">[\s\S]*<p class="save-reminder">Changes stay in this tab\. Download FGS to keep an editable copy\.<\/p>/);
+  assert.doesNotMatch(html, /class="notice"/);
 });
