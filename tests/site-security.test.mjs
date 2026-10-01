@@ -3,6 +3,7 @@ import {readFileSync} from "node:fs";
 import test from "node:test";
 
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+const styles = readFileSync(new URL("../styles.css", import.meta.url), "utf8");
 
 test("the static editor limits active content to local assets", () => {
   const policy = html.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)">/)?.[1];
@@ -29,4 +30,5 @@ test("the footer links to the full FORGE GameSheets project", () => {
 test("saving reminder sits with the document actions, not in a page-wide banner", () => {
   assert.match(html, /<div class="topbar-actions">[\s\S]*<nav aria-label="Document actions">[\s\S]*<p class="save-reminder">Changes stay in this tab\. Download FGS to keep an editable copy\.<\/p>/);
   assert.doesNotMatch(html, /class="notice"/);
+  assert.match(styles, /\.status:empty\{display:none\}/);
 });

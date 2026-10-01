@@ -80,6 +80,7 @@ button:disabled{opacity:.55;cursor:not-allowed;filter:none}
 .topbar-actions{display:grid;justify-items:end;gap:.35rem;min-width:0}
 .topbar-actions nav{justify-content:flex-end}
 .save-reminder{margin:0;color:#68635c;font-size:.76rem;line-height:1.35;text-align:right}
+.status:empty{display:none}
 footer{display:flex;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
 @media(max-width:1150px){.topbar-actions{grid-column:1/-1;justify-items:start}.topbar-actions nav{justify-content:flex-start}.save-reminder{text-align:left}}
 
