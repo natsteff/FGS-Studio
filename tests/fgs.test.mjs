@@ -168,7 +168,7 @@ test("the portable example fixture imports", () => {
   const source = readFileSync(new URL("./fixtures/example.fgs", import.meta.url), "utf8");
   assert.equal(parse(source).title, "Example GameSheet");
 });
-test("a dense five-section score sheet fits the same Letter page as Forge", () => {
+test("a dense five-section score sheet fits the same Letter page as FORGE GameSheets", () => {
   const sheet = parse(readFileSync(new URL("./fixtures/dense-score-sheet.fgs", import.meta.url), "utf8"));
   const painted = [];
   const context = {
@@ -183,7 +183,7 @@ test("a dense five-section score sheet fits the same Letter page as Forge", () =
   sheet.rows.at(-1).blocks[0].score_rows.push(...Array.from({length:14}, (_, i) => `Extra ${i + 1}`));
   assert.equal(render(sheet, canvas).fits, false);
 });
-test("Forge-derived preview uses bold category cells and paired sections", () => {
+test("Shared preview uses bold category cells and paired sections", () => {
   const sheet = parse(readFileSync(new URL("./fixtures/dense-score-sheet.fgs", import.meta.url), "utf8"));
   const html = previewHtml(sheet);
   assert.match(html, /<tr class="score"><th>Ones, Count\/Add Ones<\/th>/);

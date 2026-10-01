@@ -2,7 +2,7 @@
 
 FGS Studio is a browser-only proof of concept for creating, importing, editing,
 and exporting FGS 1.0/1.1/1.2/1.3 GameSheets. It is an independent application, not a copy
-of Forge GameSheets. Its source and GitHub Pages site are public.
+of FORGE GameSheets. Its source and GitHub Pages site are public.
 
 FGS Studio is licensed under the [GNU Affero General Public License v3.0](LICENSE).
 Its pinned renderer bundle includes MIT-licensed pdf-lib and fontkit and
@@ -45,12 +45,12 @@ cannot set `frame-ancestors` or replace the host's TLS and header controls.
   They are readable by anyone with that file; do not include secrets.
 - Score tables expose **Score table title** and **First column heading**.
   The latter defaults to **Category** for older files and can be customized in
-  1.2. Forge uses the same label in LiveSheets. Adding a 1.2 capability upgrades
+  1.2. FORGE GameSheets uses the same label in LiveSheets. Adding a 1.2 capability upgrades
   the file version; adding a logo/footer afterward never downgrades it.
 
 The SVG preview and selectable-text PDF now use one point-based display list
 from a pinned [FGS Renderer](vendor/fgs-renderer/manifest.json) build, also
-used by Forge GameSheets. Forge's Page Rendering
+used by FORGE GameSheets. FORGE GameSheets’ Page Rendering
 Profile 1.3.1 ([specification](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_PAGE_RENDERING_PROFILE_1_3.md))
 specifies page geometry, fonts, accent
 titles, category weight, and overflow behavior. The
@@ -62,11 +62,11 @@ and focus the source field. For a score-row label such as “1,” Studio select
 that row's line in **Score rows**. Editing still happens in the controls, not
 directly on the preview.
 
-The renderer source for this pinned build is Forge's
+The renderer source for this pinned build is FORGE GameSheets’
 [`packages/fgs-renderer/`](https://github.com/natsteff/forge-gamesheets/tree/main/packages/fgs-renderer).
-The current pinned renderer was built from Forge source revision
+The current pinned renderer was built from FORGE GameSheets source revision
 [`b6a10e1`](https://github.com/natsteff/forge-gamesheets/commit/b6a10e1).
-Its manifest verifies the source and artifact hashes; subsequent Forge changes
+Its manifest verifies the source and artifact hashes; subsequent FORGE GameSheets changes
 to the editor have not changed this renderer build.
 
 **Known prototype limits:** The Page Rendering Profile does not yet cover every
@@ -101,7 +101,7 @@ page. Exact two-up Half Page needs the explicit borderless choice. This print
 selection is not in `.fgs` yet: record a recommendation in Designer Notes and
 reselect the size when reopening the file. Notes do not control rendering.
 Starting values print as guidance; writable spaces remain blank. Studio has no
-LiveSheet backend. Forge provides host-controlled temporary shared tracker state.
+LiveSheet backend. FORGE GameSheets provides host-controlled temporary shared tracker state.
 Health measurement logs, MusicXML import, musical notation and multipage output
 are not included. Screenshots may show the earlier published feature set.
 
@@ -122,13 +122,13 @@ npm test
 npm run build
 ```
 
-To refresh the pinned renderer after a change in Forge's
+To refresh the pinned renderer after a change in FORGE GameSheets’
 [`packages/fgs-renderer/`](https://github.com/natsteff/forge-gamesheets/tree/main/packages/fgs-renderer)
 source package, build and test it first, then run
 `node scripts/sync-renderer.mjs` here. Commit the resulting
 `vendor/fgs-renderer/` files with the Studio change. Do not edit the bundle
 directly. The GitHub Pages workflow uses the committed vendor copy; it does
-not build the Forge renderer source on the runner.
+not build the FORGE GameSheets renderer source on the runner.
 
 ## GitHub Pages
 
@@ -140,15 +140,15 @@ commit real game documents, credentials, or private materials.
 
 ## Compatibility policy
 
-Forge's [FGS 1.0 specification](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_V1_SPECIFICATION.md)
+FORGE GameSheets’ [FGS 1.0 specification](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_V1_SPECIFICATION.md)
 and [FGS 1.1 additions](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_V1_1_SPECIFICATION.md)
 plus [FGS 1.2 additions](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_V1_2_SPECIFICATION.md)
 define the interchange format. FGS Studio has its own release schedule.
-The 1.3 contract is `docs/FGS_V1_3_SPECIFICATION.md` in Forge, with
+The 1.3 contract is `docs/FGS_V1_3_SPECIFICATION.md` in FORGE GameSheets, with
 `docs/FGS_PAGE_RENDERING_PROFILE_1_3.md` and `docs/schemas/fgs-v1.3.schema.json`.
-When Forge changes the format, explicitly update this app's parser, editor,
-renderer, and shared fixtures. Update Forge's FGS Renderer package, rebuild,
+When FORGE GameSheets changes the format, explicitly update this app's parser, editor,
+renderer, and shared fixtures. Update FORGE GameSheets’ FGS Renderer package, rebuild,
 and run `node scripts/sync-renderer.mjs` in this repository and
-`python3 scripts/sync_fgs_renderer.py` in Forge before claiming print parity.
+`python3 scripts/sync_fgs_renderer.py` in FORGE GameSheets before claiming print parity.
 Unknown format versions are rejected rather than
 silently rewritten.

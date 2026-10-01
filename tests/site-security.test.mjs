@@ -21,7 +21,7 @@ test("the static editor limits active content to local assets", () => {
   assert.doesNotMatch(html, /<script[^>]+src="https?:\/\//);
 });
 
-test("the footer links to the full Forge GameSheets project", () => {
-  assert.match(html, /<footer><a href="https:\/\/github\.com\/natsteff\/forge-gamesheets" target="_blank" rel="noopener noreferrer">Full Forge GameSheets on GitHub ↗<\/a><\/footer>/);
+test("the footer links to the full FORGE GameSheets project", () => {
+  assert.match(html, /<footer><a href="https:\/\/github\.com\/natsteff\/forge-gamesheets" target="_blank" rel="noopener noreferrer">FORGE GameSheets on GitHub ↗<\/a><\/footer>/);
   assert.doesNotMatch(html, /FGS Studio · FGS 1\.0/);
 });

@@ -4,7 +4,7 @@ const sizes = {letter:[612,792],a4:[595.28,841.89]};
 const margin = 36;
 const gap = 16;
 const rowGap = 14;
-// Match Forge's FGS v1 PDF geometry; taller rows falsely rejected valid sheets.
+// Match FORGE GameSheets’ FGS v1 PDF geometry; taller rows falsely rejected valid sheets.
 const tableTitleHeight = 22;
 const tableRowHeight = 19;
 

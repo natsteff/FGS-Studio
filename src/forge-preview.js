@@ -1,5 +1,5 @@
-// Adapted from Forge GameSheets app/static/sheet-designer.js (AGPL-3.0-only).
-// Keep the browser preview's markup and classes aligned with Forge's Designer.
+// Adapted from FORGE GameSheets app/static/sheet-designer.js (AGPL-3.0-only).
+// Keep the browser preview's markup and classes aligned with FORGE GameSheets’ Designer.
 import {validate} from "./fgs.js";
 
 const escape = (value) => String(value).replace(/[&<>\"]/g, (character) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"})[character]);

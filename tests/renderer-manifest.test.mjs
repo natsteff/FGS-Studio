@@ -11,7 +11,7 @@ test("pinned renderer bundle and notices match the manifest",async()=>{
   assert.ok(manifest.files["browser.mjs"]);
   assert.ok(manifest.files["THIRD_PARTY_NOTICES.md"]);
   for(const [file,expected] of Object.entries(manifest.files)) {
-    if(file==="cli.mjs") continue; // Forge uses the Node bundle; Studio ships only the browser bundle.
+    if(file==="cli.mjs") continue; // FORGE GameSheets uses the Node bundle; Studio ships only the browser bundle.
     const actual=createHash("sha256").update(await readFile(new URL(file,base))).digest("hex");
     assert.equal(actual,expected,file);
   }

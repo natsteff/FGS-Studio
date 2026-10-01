@@ -1,7 +1,8 @@
 # FGS Studio project guidance
 
-FGS Studio is independent of Forge GameSheets. Keep its source and releases in
-this repository. Forge's published FGS document specification and Page Rendering Profile
+FGS Studio is independent of FORGE GameSheets. Keep its source and releases in
+this repository. FORGE GameSheets’ published FGS document specification and
+Page Rendering Profile
 are the interchange and appearance authorities.
 
 - Do not copy private handoff materials here. The active preview and PDF must
