@@ -48,10 +48,10 @@ test("a new FGS 1.0 document validates and survives JSON export/import", () => {
   assert.equal(validate(sheet), sheet);
   assert.deepEqual(parse(JSON.stringify(sheet)), sheet);
 });
-test("new Studio sheets include an editable GitHub footer without changing imports", () => {
+test("new Studio sheets include an editable Studio URL footer without changing imports", () => {
   const sheet = newStudioDocument();
   assert.equal(sheet.format_version, "1.1");
-  assert.equal(sheet.footer, "Customize this sheet (with source FGS file) at https://github.com/natsteff/forge-gamesheets");
+  assert.equal(sheet.footer, "Customize this sheet (with source FGS file) at https://natsteff.github.io/FGS-Studio/");
   assert.equal(sheet.footer, STUDIO_DEFAULT_FOOTER);
   assert.deepEqual(parse(JSON.stringify(sheet)), sheet);
   const editor = readFileSync(new URL("../src/editor.js", import.meta.url), "utf8");

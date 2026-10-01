@@ -199,7 +199,7 @@ export function newBlock(type) {
 export function newDocument() {
   return {format:"forge-gamesheets",format_version:"1.0",id:newId("sheet"),title:"Untitled GameSheet",page:{size:"letter",orientation:"portrait"},theme:{accent:"#c84b24"},rows:[{id:newId("row"),blocks:[newBlock("header")]},{id:newId("row"),blocks:[newBlock("score_table")]}]};
 }
-export const STUDIO_DEFAULT_FOOTER = "Customize this sheet (with source FGS file) at https://github.com/natsteff/forge-gamesheets";
+export const STUDIO_DEFAULT_FOOTER = "Customize this sheet (with source FGS file) at https://natsteff.github.io/FGS-Studio/";
 export function newStudioDocument() {
   return {...newDocument(),format_version:"1.1",footer:STUDIO_DEFAULT_FOOTER};
 }

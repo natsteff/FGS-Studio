@@ -29,8 +29,8 @@ cannot set `frame-ancestors` or replace the host's TLS and header controls.
 - Add one portable header logo and an author footer. Studio converts PNG/JPEG
   input to a bounded PNG embedded in the FGS JSON; this preserves single-file
   import/export but makes image bytes opaque in text diffs.
-- New Studio sheets start with an editable footer pointing to the full Forge
-  GameSheets GitHub project; imported files retain their existing footer.
+- New Studio sheets start with an editable footer pointing to the FGS Studio
+  website; imported files retain their existing footer.
 - Import a `.fgs` JSON file, validate its structure, and preserve namespaced
   extensions during editing and export.
 - Show a single-page preview with overflow refusal.

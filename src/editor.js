@@ -1,4 +1,4 @@
-import {addRow, fgsFileName, pdfFileName, newBlock, newStudioDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=22";
+import {addRow, fgsFileName, pdfFileName, newBlock, newStudioDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=23";
 import {createEditHistory} from "./history.js";
 import {canMoveSectionTo, moveSectionTo, sectionNeighbor} from "./sheet-order.mjs";
 import {lineSelection, previewTargetAt} from "./preview-navigation.mjs";
