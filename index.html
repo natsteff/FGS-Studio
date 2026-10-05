@@ -7,8 +7,8 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
   <title>FGS Studio</title>
   <link rel="icon" type="image/png" sizes="128x128" href="assets/favicon.png">
-  <link rel="stylesheet" href="styles.css?v=22">
-  <script type="module" src="src/editor.js?v=24"></script>
+  <link rel="stylesheet" href="styles.css?v=23">
+  <script type="module" src="src/editor.js?v=27"></script>
 </head>
 <body>
   <header class="topbar">
@@ -57,15 +57,32 @@
         <button id="undo" type="button" class="secondary" disabled>↶ Undo</button>
         <button id="redo" type="button" class="secondary" disabled>↷ Redo</button>
       </div>
-      <p class="print-note">Choose the finished size before composing this sheet. <span id="print-note-full">For Full Page, use Download PDF.</span><span id="print-note-compact" hidden>For ordinary Letter/A4 printers, use Create print sheet; direct Download PDF makes one finished-size page without cut guides. Custom Width and Height set its orientation directly.</span> Finished size is not saved in .fgs during this trial; note the intended size in Designer Notes and reselect it after reopening.</p>
+      <p class="print-note">Choose the finished size before composing this sheet. <span id="print-note-full">For Full Page, use Download PDF.</span><span id="print-note-compact" hidden>For ordinary Letter/A4 printers, use Create print sheet; direct Download PDF makes one finished-size page without cut guides. Custom Width and Height set its orientation directly.</span> Finished size and print-sheet choices are saved with the FGS file.</p>
       <p id="fit" class="fit-info" aria-live="polite"></p>
       <p class="hint">Click a heading, table label, or list item on the preview to edit its source field.</p>
       <div id="preview" class="sheet-preview" aria-label="Printable sheet preview"></div>
     </section>
   </main>
-  <footer><span>Privacy: FGS Studio does not upload or save your sheet on a server.</span><a href="https://github.com/natsteff/forge-gamesheets" target="_blank" rel="noopener noreferrer">FORGE GameSheets on GitHub ↗</a></footer>
+  <footer><span>Privacy: FGS Studio does not upload or save your sheet on a server.</span><a href="https://github.com/natsteff/forge-gamesheets" target="_blank" rel="noopener noreferrer">Want LiveSheets and a game library? Explore FORGE GameSheets ↗</a></footer>
   <dialog id="new-dialog"><form id="new-form"><h2>New sheet</h2><label>Starting template<select id="new-template"><option value="score_sheet">Score sheet</option><option value="ruled">Lined paper</option><option value="square_grid">Graph paper</option><option value="dot_grid">Dot paper</option><option value="hex_grid">Hex paper</option><option value="music_staff">Music manuscript</option><option value="piano">Piano manuscript</option><option value="tablature">Tablature</option><option value="coordinate_grid">Coordinate grid (axes)</option><option value="tic_tac_toe">Tic-tac-toe boards</option><option value="dots_and_boxes">Dots and Boxes boards</option><option value="sudoku">Blank Sudoku grids</option></select></label><div class="dialog-actions"><button id="cancel-new" class="secondary" type="button">Cancel</button><button type="submit">Create sheet</button></div></form></dialog>
   <dialog id="examples-dialog" aria-labelledby="examples-title"><h2 id="examples-title">Example sheets</h2><p>Open an editable copy in this tab. Download FGS to keep your changes; examples do not save to a server.</p><p class="hint">These are unofficial starting points. Verify game details and any health or vehicle-maintenance information against the relevant publisher, clinician, or owner’s manual before use.</p><p id="examples-status" role="status" aria-live="polite"></p><div id="examples-list" class="examples-list"></div><div class="dialog-actions"><button id="close-examples" class="secondary" type="button">Close</button></div></dialog>
-  <dialog id="print-sheet-dialog"><form id="print-sheet-form"><h2>Create print sheet</h2><p>This places finished-size copies on Letter or A4. Direct Download PDF makes one card-sized page without cut guides and may be clipped by an ordinary printer.</p><label>Printer paper<select id="print-paper"><option value="letter">Letter</option><option value="a4">A4</option></select></label><label>Copies<input id="print-copies" type="number" min="1" max="48" value="1" required></label><label><input id="cut-guides" type="checkbox" checked> Cut guides</label><label><input id="borderless" type="checkbox"> Borderless two-up</label><p class="print-hint">Only for Half Page on matching paper, with a printer that supports edge-to-edge printing. Unavailable for card sizes.</p><p id="print-plan" class="print-plan" role="status"></p><div id="print-sheet-preview" class="print-sheet-preview" aria-label="First arranged printer page preview"></div><p class="print-hint">In the printer dialog, choose the paper and orientation shown above, print at Actual size / 100%, and turn off Fit to page. Check your printer's printable margins.</p><div class="dialog-actions"><button id="cancel-print-sheet" class="secondary" type="button">Cancel</button><button type="submit">Download print-sheet PDF</button></div></form></dialog>
+  <dialog id="print-sheet-dialog">
+    <form id="print-sheet-form">
+      <h2>Create print sheet</h2>
+      <p>This places finished-size copies on printer paper. Settings are remembered after a successful export. Direct Download PDF makes one finished-size page without cut guides and may be clipped by an ordinary printer.</p>
+      <p class="print-paper-summary" id="paper-summary"></p>
+      <label class="paper-override-toggle"><input id="override-paper" type="checkbox"> Use different printer paper</label>
+      <label class="print-field" id="paper-override" hidden><span>Printer paper</span><select id="print-paper"><option value="letter">Letter</option><option value="a4">A4</option></select></label>
+      <label class="print-field"><span>Orientation</span><select id="print-orientation"><option value="auto">Auto (fewest pages)</option><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></label>
+      <label class="print-field"><span>Copies</span><input id="print-copies" type="number" min="1" max="48" value="1" required></label>
+      <label><input id="cut-guides" type="checkbox" checked> Cut guides</label>
+      <label><input id="borderless" type="checkbox"> Borderless two-up</label>
+      <p class="print-hint">Only for Half Page on matching paper, with a printer that supports edge-to-edge printing. Unavailable for card sizes.</p>
+      <p id="print-plan" class="print-plan" role="status"></p>
+      <div id="print-sheet-preview" class="print-sheet-preview" aria-label="First arranged printer page preview"></div>
+      <p class="print-hint">In the printer dialog, choose the paper and orientation shown above, print at Actual size / 100%, and turn off Fit to page. Check your printer's printable margins.</p>
+      <div class="dialog-actions"><button id="cancel-print-sheet" class="secondary" type="button">Cancel</button><button type="submit">Download print-sheet PDF</button></div>
+    </form>
+  </dialog>
 </body>
 </html>

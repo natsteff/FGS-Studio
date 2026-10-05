@@ -31,6 +31,13 @@ test("new content promotes to 1.3 and survives JSON round trip",()=>{
 test("paper starters use one full-page block and preserve document metadata",()=>{
   for(const pattern of [...Object.keys(PATTERNS),"piano"]){const d=newDocument();d.designer_notes="Keep for later";let index=0;applyPaperTemplate(d,pattern,()=>"id"+index++);validate(d);assert.deepEqual(parse(JSON.stringify(d)),d);assert.equal(d.rows.length,1);assert.equal(d.rows[0].blocks.length,1);assert.equal(d.designer_notes,"Keep for later");assert.equal(d.format_version,"1.3");}
 });
+test("paper starters retain FGS 1.4 print defaults",()=>{
+  const d=newDocument();d.format_version="1.4";d.page.finished_size={preset:"half"};
+  applyPaperTemplate(d,"ruled",prefix=>`${prefix}-test`);
+  assert.equal(d.format_version,"1.4");
+  assert.deepEqual(d.page.finished_size,{preset:"half"});
+  validate(d);
+});
 test("old readers cannot accept new blocks and play data is not accepted",()=>{
   const d=newDocument();addRow(d,"tracker");d.format_version="1.2";assert.throws(()=>validate(d));
   d.format_version="1.3";d.rows.at(-1).blocks[0].value=3;assert.throws(()=>validate(d),/unknown/i);

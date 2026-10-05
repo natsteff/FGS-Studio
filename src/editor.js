@@ -1,8 +1,8 @@
-import {addRow, fgsFileName, pdfFileName, newBlock, newStudioDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=24";
+import {addRow, fgsFileName, pdfFileName, newBlock, newStudioDocument, parse, validate, verifyLogoImages} from "./fgs.js?v=27";
 import {createEditHistory} from "./history.js";
 import {canMoveSectionTo, moveSectionTo, sectionNeighbor} from "./sheet-order.mjs";
 import {lineSelection, previewTargetAt} from "./preview-navigation.mjs";
-import {loadPrintEngine, prepareHeaderLogo,contentControls,validateFill,applyPaperTemplate} from "../vendor/fgs-renderer/browser.mjs?profile=fgs-page-1.3.1&layout=9";
+import {loadPrintEngine, prepareHeaderLogo,contentControls,validateFill,applyPaperTemplate} from "../vendor/fgs-renderer/browser.mjs?profile=fgs-page-1.3.1&layout=10";
 
 let documentModel = newStudioDocument();
 let selectedId = documentModel.rows[0].blocks[0].id;
@@ -20,10 +20,10 @@ function printSizeSelection() {
   return selection;
 }
 function syncCustomBounds(){const cm=byId("custom-unit").value==="cm";for(const id of ["custom-width","custom-height"]){byId(id).min=cm?"1.27":"0.5";byId(id).max=cm?"35.56":"14";}}
-function printSheetOptions(){return {paper:byId("print-paper").value,copies:Number(byId("print-copies").value),cutGuides:byId("cut-guides").checked,borderless:byId("borderless").checked};}
+function printSheetOptions(){return {paper:byId("override-paper").checked?byId("print-paper").value:documentModel.page.size,orientation:byId("print-orientation").value,copies:Number(byId("print-copies").value),cutGuides:byId("cut-guides").checked,borderless:byId("borderless").checked};}
 async function updatePrintPlan(){
   const revision=++printPlanRevision;
-  const eligible=byId("print-size").value==="half"&&byId("print-paper").value===documentModel.page.size;
+  const eligible=byId("print-size").value==="half"&&printSheetOptions().paper===documentModel.page.size;
   byId("borderless").disabled=!eligible;
   if(!eligible && byId("borderless").checked){
     byId("borderless").checked=false;
@@ -36,7 +36,8 @@ async function updatePrintPlan(){
     const plan=engine.printSheetPlan(layout,printSheetOptions());
     if(revision!==printPlanRevision)return;
     const counts=plan.pages.map(page=>page.length).join(" + ");
-    byId("print-plan").textContent=`Output: ${plan.paper.toUpperCase()} ${plan.orientation} PDF; ${plan.capacity} ${plan.capacity===1?"copy":"copies"} per page. ${plan.pages.length} ${plan.pages.length===1?"page":"pages"} (${counts}). Preview shows page 1. ${plan.borderless?"Edge-to-edge printing required.":"0.5-inch printable margin, including cut guides."}`;
+    const marginNote=plan.borderless?"Edge-to-edge printing required.":plan.cutGuides?"0.5-inch printable margin, including cut guides.":"0.5-inch printable margin; cut guides off.";
+    byId("print-plan").textContent=`Output: ${plan.paper.toUpperCase()} ${plan.orientation} PDF; ${plan.capacity} ${plan.capacity===1?"copy":"copies"} per page. ${plan.pages.length} ${plan.pages.length===1?"page":"pages"} (${counts}). Preview shows page 1. ${marginNote}`;
     byId("print-sheet-preview").innerHTML=engine.toPrintSheetSvg(layout,printSheetOptions());
   }catch(error){if(revision===printPlanRevision){byId("print-plan").textContent=error.message;byId("print-sheet-preview").innerHTML="";}}
 }
@@ -54,7 +55,50 @@ function updatePrintControls(){
   printSheet.disabled=!compact;
   refreshPreview();
 }
-function resetPrintSize(){byId("print-size").value="full";updatePrintControls();}
+function resetPrintSize(){
+  const size=documentModel.page.finished_size??{preset:"full"};
+  byId("print-size").value=size.preset;
+  if(size.preset==="custom"){
+    byId("custom-width").value=size.width;
+    byId("custom-height").value=size.height;
+    byId("custom-unit").value=size.unit;
+  }
+  syncCustomBounds();updatePrintControls();
+}
+function saveFinishedSize(){
+  const size=printSizeSelection();
+  if(size.preset==="custom"){
+    size.width=Number(size.width);size.height=Number(size.height);
+    const factor=size.unit==="cm"?1/2.54:1;
+    if(!Number.isFinite(size.width)||!Number.isFinite(size.height)||size.width*factor<0.5||size.width*factor>14||size.height*factor<0.5||size.height*factor>14){status("Enter custom dimensions between 0.5 and 14 inches.",true);return;}
+  }
+  edit(()=>{documentModel.format_version="1.4";documentModel.page.finished_size=size;});
+  updatePrintControls();
+}
+function restorePrintSheet(){
+  const sheet=documentModel.print_sheet??{paper:"inherit",copies:1,cut_guides:true,borderless:false};
+  byId("override-paper").checked=sheet.paper!=="inherit";
+  byId("print-paper").value=sheet.paper==="inherit"?documentModel.page.size:sheet.paper;
+  byId("print-orientation").value=sheet.orientation??"auto";
+  byId("print-copies").value=sheet.copies;
+  byId("cut-guides").checked=sheet.cut_guides;
+  byId("borderless").checked=sheet.borderless;
+  copiesManuallyEdited=false;
+  updatePaperControls();
+}
+function updatePaperControls(){
+  const override=byId("override-paper").checked;
+  byId("paper-override").hidden=!override;
+  byId("paper-summary").hidden=override;
+  byId("paper-summary").textContent=`Printer paper: same as sheet (${documentModel.page.size.toUpperCase()})`;
+}
+function savePrintSheet(){
+  const options=printSheetOptions();
+  if(!Number.isInteger(options.copies)||options.copies<1||options.copies>48)return;
+  const sheet={paper:byId("override-paper").checked?options.paper:"inherit",orientation:options.orientation,copies:options.copies,cut_guides:options.cutGuides,borderless:options.borderless};
+  if(JSON.stringify(documentModel.print_sheet)===JSON.stringify(sheet))return;
+  edit(()=>{documentModel.format_version="1.4";documentModel.print_sheet=sheet;});
+}
 const history = createEditHistory();
 const snapshot = () => ({document: documentModel, selectedId});
 function historyButtons() {
@@ -90,6 +134,7 @@ function restore(state) {
   if (!state) return;
   documentModel = state.document;
   selectedId = state.selectedId;
+  resetPrintSize();
   refresh();
 }
 
@@ -138,7 +183,7 @@ function blockEditor(block, row, rowIndex, blockIndex) {
   if (block.type === "score_table") fields.append(field("First column heading", block.first_column_heading ?? "Category", (value) => {
     const heading = value.trim() || "Category";
     if (heading === "Category") delete block.first_column_heading;
-    else {if(documentModel.format_version!=="1.3")documentModel.format_version="1.2";block.first_column_heading=heading;}
+    else {if(["1.0","1.1"].includes(documentModel.format_version))documentModel.format_version="1.2";block.first_column_heading=heading;}
   }, {max:80,key:"first_column_heading"}));
   if (block.type === "header") {
     fields.append(field("Subtitle", block.subtitle, (value) => {block.subtitle=value;}, {max:240,key:"subtitle"}));
@@ -349,8 +394,8 @@ function download(blob, filename) {
 focusedEdit(byId("title"), "input", (input) => {documentModel.title=input.value;});
 byId("page-size").addEventListener("change", (event) => {edit(() => {documentModel.page.size=event.target.value;});refreshPreview();});
 byId("orientation").addEventListener("change", (event) => {edit(() => {documentModel.page.orientation=event.target.value;});refreshPreview();});
-byId("print-size").addEventListener("change",updatePrintControls);
-["custom-width","custom-height","custom-unit"].forEach(id=>byId(id).addEventListener("change",()=>{syncCustomBounds();refreshPreview();}));
+byId("print-size").addEventListener("change",saveFinishedSize);
+["custom-width","custom-height","custom-unit"].forEach(id=>byId(id).addEventListener("change",()=>{syncCustomBounds();if(byId("print-size").value==="custom")saveFinishedSize();}));
 syncCustomBounds();
 byId("export-print-sheet").disabled=true;
 focusedEdit(byId("accent"), "input", (input) => {documentModel.theme.accent=input.value;});
@@ -360,7 +405,7 @@ focusedEdit(byId("footer"), "change", (input) => {
   else delete documentModel.footer;
 });
 focusedEdit(byId("designer-notes"), "input", (input) => {
-  if (input.value) {if(documentModel.format_version!=="1.3")documentModel.format_version="1.2";documentModel.designer_notes=input.value;}
+  if (input.value) {if(["1.0","1.1"].includes(documentModel.format_version))documentModel.format_version="1.2";documentModel.designer_notes=input.value;}
   else delete documentModel.designer_notes;
 });
 byId("undo").addEventListener("click", () => restore(history.undo(snapshot())));
@@ -441,14 +486,12 @@ byId("export-pdf").addEventListener("click", async () => {
   } catch (error) {status(error.message, true);}
 });
 byId("export-print-sheet").addEventListener("click",()=>{
-  byId("print-paper").value=documentModel.page.size;
-  byId("print-copies").value="1";
-  copiesManuallyEdited=false;
-  byId("borderless").checked=false;
+  restorePrintSheet();
   byId("print-sheet-dialog").showModal();
   updatePrintPlan();
 });
-for(const id of ["print-paper","cut-guides"])byId(id).addEventListener("change",updatePrintPlan);
+byId("override-paper").addEventListener("change",()=>{updatePaperControls();updatePrintPlan();});
+for(const id of ["print-paper","print-orientation","cut-guides"])byId(id).addEventListener("change",updatePrintPlan);
 byId("print-copies").addEventListener("input",()=>{copiesManuallyEdited=true;updatePrintPlan();});
 byId("print-copies").addEventListener("change",()=>{copiesManuallyEdited=true;updatePrintPlan();});
 byId("borderless").addEventListener("change",()=>{
@@ -464,6 +507,7 @@ byId("print-sheet-form").addEventListener("submit",async(event)=>{
     const layout=engine.layout(documentModel,printSizeSelection());
     if(!layout.fits)throw new Error(layout.reason || `“${layout.overflow}” does not fit at the selected print size.`);
     const pdf=await engine.toPrintSheetPdf(layout,documentModel.title,printSheetOptions());
+    savePrintSheet();
     download(new Blob([pdf],{type:"application/pdf"}),pdfFileName(documentModel.title,true));
     byId("print-sheet-dialog").close();
     status("Print-sheet PDF downloaded.");

@@ -1,5 +1,5 @@
 import {validateContent,validateFill,newContent} from "../vendor/fgs-renderer/browser.mjs";
-export const VERSION = "1.3";
+export const VERSION = "1.4";
 export const MAX_BYTES = 256 * 1024;
 const idPattern = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
 const extensionPattern = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/;
@@ -56,12 +56,12 @@ function logo(value, path) {
 function block(value, path, seen, version) {
   object(value, path);
   if (["tracker","paper_pattern"].includes(value.type)) {
-    if(version!=="1.3")fail(path,"requires FGS 1.3");
+    if(!["1.3","1.4"].includes(version))fail(path,"requires FGS 1.3");
     validateContent(value);uniqueId(value.id,`${path}.id`,seen);string(value.title,`${path}.title`,value.type==="paper_pattern"?0:1,160);extensions(value.extensions,`${path}.extensions`);return;
   }
   if (!kinds.has(value.type)) fail(path, "unsupported block type");
   const common = ["id", "type", "title", "extensions"];
-  const fields = {header:["subtitle",...(version !== "1.0" ? ["logo"] : [])],score_table:["players","score_rows","show_total","total_label",...(["1.2","1.3"].includes(version) ? ["first_column_heading"] : [])],reference:["items"],checklist:["items"],notes:["lines"]}[value.type];
+  const fields = {header:["subtitle",...(version !== "1.0" ? ["logo"] : [])],score_table:["players","score_rows","show_total","total_label",...(["1.2","1.3","1.4"].includes(version) ? ["first_column_heading"] : [])],reference:["items"],checklist:["items"],notes:["lines"]}[value.type];
   keys(value, [...common, ...fields], ["id", "type", "title", ...fields.filter((field) => !["logo", "first_column_heading"].includes(field))], path);
   uniqueId(value.id, `${path}.id`, seen);
   string(value.title, `${path}.title`, value.type === "header" ? 0 : 1, 160);
@@ -87,18 +87,33 @@ function block(value, path, seen, version) {
 }
 
 export function validate(document) {
-  const isCurrent = ["1.2",VERSION].includes(document?.format_version);
-  keys(document, ["format", "format_version", "id", "title", "page", "theme", "rows", "extensions", ...(["1.1","1.2", VERSION].includes(document?.format_version) ? ["footer"] : []), ...(isCurrent ? ["designer_notes"] : [])], ["format", "format_version", "id", "title", "page", "theme", "rows"], "FGS");
+  const isCurrent = ["1.2","1.3",VERSION].includes(document?.format_version);
+  keys(document, ["format", "format_version", "id", "title", "page", "theme", "rows", "extensions", ...(["1.1","1.2","1.3",VERSION].includes(document?.format_version) ? ["footer"] : []), ...(isCurrent ? ["designer_notes"] : []), ...(document?.format_version===VERSION?["print_sheet"]:[])], ["format", "format_version", "id", "title", "page", "theme", "rows"], "FGS");
   if (document.format !== "forge-gamesheets") fail("FGS", "unknown format");
-  if (!["1.0", "1.1","1.2", VERSION].includes(document.format_version)) fail("FGS", `only FGS 1.0–${VERSION} are supported`);
+  if (!["1.0", "1.1","1.2","1.3", VERSION].includes(document.format_version)) fail("FGS", `only FGS 1.0–${VERSION} are supported`);
   if (document.designer_notes !== undefined && (typeof document.designer_notes !== "string" || [...document.designer_notes].length > 4000 || /[\u0000-\u0008\u000b-\u001f\u007f]/.test(document.designer_notes))) fail("FGS.designer_notes", "must be plain text of at most 4000 characters");
   if (document.footer !== undefined && (typeof document.footer !== "string" || document.footer.length < 1 || document.footer.length > 4000 || document.footer.split("\n").length > 2 || document.footer.split("\n").some((line) => !line.trim()) || /[\u0000-\u0009\u000b-\u001f\u007f]/.test(document.footer))) fail("FGS.footer", "must be one or two nonempty lines (up to 4,000 characters for import safety)");
   const seen = new Set();
   uniqueId(document.id, "FGS.id", seen);
   string(document.title, "FGS.title", 1, 160);
-  keys(document.page, ["size", "orientation", "extensions"], ["size", "orientation"], "FGS.page");
+  keys(document.page, ["size", "orientation", "extensions", ...(document.format_version===VERSION?["finished_size"]:[])], ["size", "orientation"], "FGS.page");
   if (!["letter", "a4"].includes(document.page.size)) fail("FGS.page", "unsupported page size");
   if (!["portrait", "landscape"].includes(document.page.orientation)) fail("FGS.page", "unsupported orientation");
+  if(document.page.finished_size!==undefined){
+    const size=document.page.finished_size;
+    keys(size,["preset","width","height","unit"],["preset"],"FGS.page.finished_size");
+    if(!["full","half","poker","bridge","custom"].includes(size.preset))fail("FGS.page.finished_size","unsupported preset");
+    if(size.preset==="custom"){
+      keys(size,["preset","width","height","unit"],["preset","width","height","unit"],"FGS.page.finished_size");
+      if(!["in","cm"].includes(size.unit))fail("FGS.page.finished_size","unit must be in or cm");
+      for(const name of ["width","height"])if(typeof size[name]!=="number"||!Number.isFinite(size[name])||size[name]*(size.unit==="cm"?1/2.54:1)<0.5||size[name]*(size.unit==="cm"?1/2.54:1)>14)fail("FGS.page.finished_size",`${name} must be 0.5–14 inches`);
+    }else if(Object.keys(size).length!==1)fail("FGS.page.finished_size","only custom size may have dimensions");
+  }
+  if(document.print_sheet!==undefined){
+    const sheet=document.print_sheet;
+    keys(sheet,["paper","copies","cut_guides","borderless","orientation"],["paper","copies","cut_guides","borderless"],"FGS.print_sheet");
+    if(!["inherit","letter","a4"].includes(sheet.paper)||!Number.isInteger(sheet.copies)||sheet.copies<1||sheet.copies>48||typeof sheet.cut_guides!=="boolean"||typeof sheet.borderless!=="boolean"||!(["auto","portrait","landscape"].includes(sheet.orientation??"auto")))fail("FGS.print_sheet","invalid print-sheet defaults");
+  }
   extensions(document.page.extensions, "FGS.page.extensions");
   keys(document.theme, ["accent", "extensions"], ["accent"], "FGS.theme");
   if (typeof document.theme.accent !== "string" || !/^#[0-9a-f]{6}$/.test(document.theme.accent)) fail("FGS.theme", "accent must be lowercase #rrggbb");
@@ -205,7 +220,7 @@ export function newStudioDocument() {
 }
 export function addRow(document, type) {
   document.rows.push({id:newId("row"),blocks:[newBlock(type)]});
-  if(["tracker","paper_pattern"].includes(type))document.format_version="1.3";
+  if(["tracker","paper_pattern"].includes(type)&&document.format_version!=="1.4")document.format_version="1.3";
 }
 function sheetFileName(title, suffix) { const stem=title.replace(/[<>:"/\\|?*\x00-\x1f\x7f]/g,"-").trim().replace(/[. ]+$/,""); return `${stem || "Game Sheet"}${suffix}`; }
 export function fgsFileName(title) { return sheetFileName(title,".fgs"); }

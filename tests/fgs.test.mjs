@@ -115,14 +115,33 @@ test("footer preserves two long entered lines without an input character cutoff"
 });
 test("unknown versions, properties and block types are rejected", () => {
   const sheet = newDocument();
-  sheet.format_version = "1.4";
-  assert.throws(() => validate(sheet), /only FGS 1.0–1.3/);
+  sheet.format_version = "1.5";
+  assert.throws(() => validate(sheet), /only FGS 1.0–1.4/);
   sheet.format_version = "1.1";
   sheet.unknown = true;
   assert.throws(() => validate(sheet), /unknown property/);
   delete sheet.unknown;
   sheet.rows[0].blocks[0].type = "script";
   assert.throws(() => validate(sheet), /unsupported block type/);
+});
+
+test("FGS 1.4 keeps optional print defaults portable without changing older files",()=>{
+  const sheet=newStudioDocument();
+  sheet.format_version="1.4";
+  sheet.page.finished_size={preset:"custom",width:5,height:7,unit:"in"};
+  sheet.print_sheet={paper:"inherit",orientation:"auto",copies:3,cut_guides:true,borderless:false};
+  assert.deepEqual(parse(JSON.stringify(sheet)),sheet);
+  sheet.print_sheet.orientation="sideways";
+  assert.throws(()=>validate(sheet),/print-sheet defaults/);
+  sheet.print_sheet.orientation="auto";
+  sheet.print_sheet.copies=49;
+  assert.throws(()=>validate(sheet),/print-sheet defaults/);
+  sheet.print_sheet.copies=3;
+  sheet.page.finished_size.width=0.1;
+  assert.throws(()=>validate(sheet),/0.5–14 inches/);
+  delete sheet.page.finished_size;
+  sheet.format_version="1.3";
+  assert.throws(()=>validate(sheet),/unknown property print_sheet/);
 });
 
 test("FGS 1.2 preserves editorial notes and optional first-column heading",()=>{

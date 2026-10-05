@@ -1,7 +1,7 @@
 # FGS Studio
 
 FGS Studio is a browser-only proof of concept for creating, importing, editing,
-and exporting FGS 1.0/1.1/1.2/1.3 GameSheets. It is an independent application, not a copy
+and exporting FGS 1.0–1.4 GameSheets. It is an independent application, not a copy
 of FORGE GameSheets. Its source and GitHub Pages site are public.
 
 FGS Studio is licensed under the [GNU Affero General Public License v3.0](LICENSE).
@@ -100,15 +100,20 @@ Bridge Card and Custom Size. In the small-format beta, each size is an
 intentional sheet design: headings and content wrap, then the complete composition
 is uniformly fitted if needed. The preview reports the scale and approximate body
 type size for the designer to judge. Preview and PDF share the finished-size layout;
-**Create print sheet** places identical sheets on Letter or A4, with optional cut
-guides and a 0.5-inch printable margin. The dialog states the PDF orientation,
+**Create print sheet** places identical sheets on Letter or A4, inheriting the
+sheet's Page size unless printer paper is overridden. Auto orientation uses the
+fewest pages for the requested copies, preferring portrait on a tie; manual
+Portrait and Landscape are available. Cut guides are optional and ordinary
+printing reserves a 0.5-inch margin. The dialog states the PDF orientation,
 copies per page, and total pages. Eight poker cards use two pages (six plus
 two); direct Download PDF makes one card-sized page without cut guides and
 requires suitable card stock or borderless printing. In the printer dialog,
 choose the PDF's paper and orientation, Actual size / 100%, and disable Fit to
 page. Exact two-up Half Page needs the explicit borderless choice. This print
-selection is not in `.fgs` yet: record a recommendation in Designer Notes and
-reselect the size when reopening the file. Notes do not control rendering.
+selection is saved as last used after a successful print-sheet download in FGS
+1.4; opening or canceling the dialog does not save it. Download FGS afterward
+to retain those settings beyond the browser tab. Older files still open with
+Full Page. Notes do not control rendering.
 Starting values print as guidance; writable spaces remain blank. Studio has no
 LiveSheet backend. FORGE GameSheets provides host-controlled temporary shared tracker state.
 Health measurement logs, MusicXML import, musical notation and multipage output
@@ -162,8 +167,9 @@ FORGE GameSheets’ [FGS 1.0 specification](https://github.com/natsteff/forge-ga
 and [FGS 1.1 additions](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_V1_1_SPECIFICATION.md)
 plus [FGS 1.2 additions](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_V1_2_SPECIFICATION.md)
 define the interchange format. FGS Studio has its own release schedule.
-The 1.3 contract is `docs/FGS_V1_3_SPECIFICATION.md` in FORGE GameSheets, with
-`docs/FGS_PAGE_RENDERING_PROFILE_1_3.md` and `docs/schemas/fgs-v1.3.schema.json`.
+The current 1.4 additions are in `docs/FGS_V1_4_SPECIFICATION.md` in FORGE
+GameSheets, with `docs/schemas/fgs-v1.4.schema.json`; the Page Rendering Profile
+remains `docs/FGS_PAGE_RENDERING_PROFILE_1_3.md`.
 When FORGE GameSheets changes the format, explicitly update this app's parser, editor,
 renderer, and shared fixtures. Update FORGE GameSheets’ FGS Renderer package, rebuild,
 and run `node scripts/sync-renderer.mjs` in this repository and
