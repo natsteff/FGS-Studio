@@ -23,7 +23,7 @@ test("the static editor limits active content to local assets", () => {
 });
 
 test("the footer links to the full FORGE GameSheets project", () => {
-  assert.match(html, /<footer><span>Privacy: FGS Studio does not upload or save your sheet on a server\.<\/span><a href="https:\/\/github\.com\/natsteff\/forge-gamesheets" target="_blank" rel="noopener noreferrer">Try FORGE GameSheets ↗ to design and save custom GameSheets, browse a searchable resource library, use LiveSheets, and more!<\/a><\/footer>/);
+  assert.match(html, /<footer><span>Privacy: FGS Studio does not upload or save your sheet on a server\.<\/span><a href="https:\/\/github\.com\/natsteff\/forge-gamesheets" target="_blank" rel="noopener noreferrer">Try FORGE GameSheets ↗ to design and save custom GameSheets, manage a searchable resource library, use LiveSheets, and more!<\/a><\/footer>/);
   assert.doesNotMatch(html, /FGS Studio · FGS 1\.0/);
 });
 
