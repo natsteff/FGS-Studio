@@ -1,8 +1,9 @@
 # FGS Studio
 
-FGS Studio is a browser-only proof of concept for creating, importing, editing,
+FGS Studio is a public, browser-only editor for creating, importing, editing,
 and exporting FGS 1.0–1.4 GameSheets. It is an independent application, not a copy
-of FORGE GameSheets. Its source and GitHub Pages site are public.
+of FORGE GameSheets. Use it at <https://natsteff.github.io/FGS-Studio/> without
+installing an application server.
 
 FGS Studio is licensed under the [GNU Affero General Public License v3.0](LICENSE).
 Its pinned renderer bundle includes MIT-licensed pdf-lib and fontkit and
@@ -21,7 +22,7 @@ not transmitted to the host or any API.
 tab. The chooser sits between New and Import FGS; it is not a saved-sheet
 library. Download FGS before opening an example if you want to retain your
 current work. Examples are public files in the static site, including the
-game-specific sheets supplied for this beta. They are unofficial starting
+game-specific sheets supplied with the site. They are unofficial starting
 points, not affiliated with or endorsed by the named game or product makers,
 and not medical or manufacturer guidance. Verify relevant details independently
 before use.
@@ -31,10 +32,10 @@ content to same-origin files. The included Pages workflow publishes static files
 without app-defined response headers, so the policy is in an HTML meta tag; it
 cannot set `frame-ancestors` or replace the host's TLS and header controls.
 
-## First proof-of-concept scope
+## What FGS Studio supports
 
-- Create and edit FGS 1.0/1.1/1.2 headers, score tables, references, checklists, and
-  lined notes in one- or two-block rows.
+- Create and edit FGS 1.0–1.4 sheets with headers, score tables, references,
+  checklists, notes, trackers, and reusable paper in full-width or paired sections.
 - Add one portable header logo and an author footer. Studio converts PNG/JPEG
   input to a bounded PNG embedded in the FGS JSON; this preserves single-file
   import/export but makes image bytes opaque in text diffs.
@@ -54,8 +55,9 @@ cannot set `frame-ancestors` or replace the host's TLS and header controls.
   They are readable by anyone with that file; do not include secrets.
 - Score tables expose **Score table title** and **First column heading**.
   The latter defaults to **Category** for older files and can be customized in
-  1.2. FORGE GameSheets uses the same label in LiveSheets. Adding a 1.2 capability upgrades
-  the file version; adding a logo/footer afterward never downgrades it.
+  FGS 1.2 and later. FORGE GameSheets uses the same label in LiveSheets. Adding
+  a newer capability upgrades the file to the required version; adding a
+  logo or footer afterward never downgrades it.
 
 The SVG preview and selectable-text PDF now use one point-based display list
 from a pinned [FGS Renderer](vendor/fgs-renderer/manifest.json) build, also
@@ -73,17 +75,15 @@ directly on the preview.
 
 The renderer source for this pinned build is FORGE GameSheets’
 [`packages/fgs-renderer/`](https://github.com/natsteff/forge-gamesheets/tree/main/packages/fgs-renderer).
-The current pinned renderer was built from FORGE GameSheets source revision
-[`b6a10e1`](https://github.com/natsteff/forge-gamesheets/commit/b6a10e1).
-Its manifest verifies the source and artifact hashes; subsequent FORGE GameSheets changes
-to the editor have not changed this renderer build.
+Its manifest verifies the source and artifact hashes. Renderer updates are
+explicitly synchronized from FORGE GameSheets rather than loaded dynamically.
 
-**Known prototype limits:** The Page Rendering Profile does not yet cover every
-Unicode script. FGSZ, general image sections,
-LiveSheets, browser autosave, and multi-page output are not implemented.
-These gaps should be closed or explicitly accepted before a general release.
+**Current limits:** The Page Rendering Profile does not cover every Unicode
+script. FGSZ, general image sections, LiveSheets, browser autosave, and
+multi-page output are not part of FGS Studio. FORGE GameSheets offers LiveSheets
+and a managed game library.
 
-## Trackers and reusable paper (FGS 1.3)
+## Trackers, reusable paper, and print sizes
 
 Both editors share controls, defaults and rendering for checkbox/numbered-box/
 segmented-bar/current-maximum trackers and ruled/square/dot/hex/music/tablature
@@ -96,7 +96,7 @@ patterns with other sections; **Fill remaining page** must be last and full widt
 Spacing is editable in millimeters/inches and saved in quarter-point increments.
 Print at **actual size (100%)**. Overflow is refused rather than clipped or shrunk.
 The Finished size control also offers Full Page (unchanged), Half Page, Poker Card,
-Bridge Card and Custom Size. In the small-format beta, each size is an
+Bridge Card and Custom Size. For smaller formats, each size is an
 intentional sheet design: headings and content wrap, then the complete composition
 is uniformly fitted if needed. The preview reports the scale and approximate body
 type size for the designer to judge. Preview and PDF share the finished-size layout;
@@ -138,7 +138,7 @@ description from the document; no hand-maintained list is needed. Every file
 in that folder becomes publicly downloadable after publication. Keep private
 or unreviewed candidates outside it; see the [example review rules](examples/README.md).
 
-Run the browser-app tests and production packaging with Node.js:
+Run the browser-app tests and build the publishable static site with Node.js:
 
 ```sh
 npm test
@@ -163,13 +163,11 @@ commit real game documents, credentials, or private materials.
 
 ## Compatibility policy
 
-FORGE GameSheets’ [FGS 1.0 specification](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_V1_SPECIFICATION.md)
-and [FGS 1.1 additions](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_V1_1_SPECIFICATION.md)
-plus [FGS 1.2 additions](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_V1_2_SPECIFICATION.md)
-define the interchange format. FGS Studio has its own release schedule.
-The current 1.4 additions are in `docs/FGS_V1_4_SPECIFICATION.md` in FORGE
-GameSheets, with `docs/schemas/fgs-v1.4.schema.json`; the Page Rendering Profile
-remains `docs/FGS_PAGE_RENDERING_PROFILE_1_3.md`.
+FORGE GameSheets’ [current FGS 1.4 format index and version history](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_FORMAT.md)
+defines the interchange format and links the earlier specifications. FGS Studio
+has its own release schedule. FGS 1.4 adds portable finished-size and print-sheet
+defaults; the [Page Rendering Profile 1.3.1](https://github.com/natsteff/forge-gamesheets/blob/main/docs/FGS_PAGE_RENDERING_PROFILE_1_3.md)
+is a separate rendering contract and remains current.
 When FORGE GameSheets changes the format, explicitly update this app's parser, editor,
 renderer, and shared fixtures. Update FORGE GameSheets’ FGS Renderer package, rebuild,
 and run `node scripts/sync-renderer.mjs` in this repository and

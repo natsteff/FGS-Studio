@@ -32,3 +32,8 @@ test("saving reminder sits with the document actions, not in a page-wide banner"
   assert.doesNotMatch(html, /class="notice"/);
   assert.match(styles, /\.status:empty\{display:none\}/);
 });
+
+test("preview edit hint is centered with the sheet", () => {
+  assert.match(html, /Click a heading, table label, or list item on the preview to edit its source field\./);
+  assert.match(styles, /\.preview-area>\.hint\{max-width:48rem;margin:0 auto 1rem;text-align:center\}/);
+});
