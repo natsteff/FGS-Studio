@@ -11,9 +11,8 @@
 </p>
 
 A hosted alternative to [FORGE GameSheets](https://github.com/natsteff/forge-gamesheets),
-FGS Studio is a browser-only editor for creating, importing, editing, and
-exporting FGS 1.0–1.4 GameSheets. Use it at <https://natsteff.github.io/FGS-Studio/>
-without installing an application server.
+FGS Studio lets you create and edit board game (or similar) game sheets in your browser
+and export them as FGS or PDF. It supports FGS 1.0–1.4, and no account is required.
 
 FGS Studio is licensed under the [GNU Affero General Public License v3.0](LICENSE).
 Its pinned renderer bundle includes MIT-licensed pdf-lib and fontkit and
