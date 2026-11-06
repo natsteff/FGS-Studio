@@ -2,14 +2,18 @@
 
 **Version 0.1.0**
 
-<img src="assets/fgs-studio-logo.png" alt="FGS Studio logo" width="480">
+<p align="center">
+  <img src="assets/fgs-studio-logo.png" alt="FGS Studio logo" width="480">
+</p>
 
-<a href="https://natsteff.github.io/FGS-Studio/"><img src="docs/images/try-fgs-studio.png" alt="Try FGS Studio Now" width="352"></a>
+<p align="center">
+  <a href="https://natsteff.github.io/FGS-Studio/"><img src="docs/images/try-fgs-studio.png" alt="Try FGS Studio Now" width="352"></a>
+</p>
 
-FGS Studio is a public, browser-only editor for creating, importing, editing,
-and exporting FGS 1.0–1.4 GameSheets. It is an independent application, not a copy
-of FORGE GameSheets. Use it at <https://natsteff.github.io/FGS-Studio/> without
-installing an application server.
+A hosted alternative to [FORGE GameSheets](https://github.com/natsteff/forge-gamesheets),
+FGS Studio is a browser-only editor for creating, importing, editing, and
+exporting FGS 1.0–1.4 GameSheets. Use it at <https://natsteff.github.io/FGS-Studio/>
+without installing an application server.
 
 FGS Studio is licensed under the [GNU Affero General Public License v3.0](LICENSE).
 Its pinned renderer bundle includes MIT-licensed pdf-lib and fontkit and
