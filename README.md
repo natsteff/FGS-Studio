@@ -1,5 +1,11 @@
 # FGS Studio
 
+**Version 0.1.0**
+
+<img src="assets/fgs-studio-logo.png" alt="FGS Studio logo" width="480">
+
+<a href="https://natsteff.github.io/FGS-Studio/"><img src="docs/images/try-fgs-studio.png" alt="Try FGS Studio Now" width="352"></a>
+
 FGS Studio is a public, browser-only editor for creating, importing, editing,
 and exporting FGS 1.0–1.4 GameSheets. It is an independent application, not a copy
 of FORGE GameSheets. Use it at <https://natsteff.github.io/FGS-Studio/> without
